@@ -22,7 +22,7 @@ export default function Search() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searched, setSearched] = useState(false);
-  const [selectedProperty, setSelectedProperty] = useState(null);  // ✅ added
+  const [selectedProperty, setSelectedProperty] = useState(null);  
 
   async function fetchResults(currentPage = 1) {
     setLoading(true);

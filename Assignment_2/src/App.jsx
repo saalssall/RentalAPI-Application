@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import About from './pages/About';
 import Home from './pages/Home';
+import AuthenticatedRoute from './components/AuthRoute';
 
 
 // ── Protected Route ──────────────────────────────────────────
