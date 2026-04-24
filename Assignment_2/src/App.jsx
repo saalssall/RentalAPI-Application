@@ -2,7 +2,6 @@ import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 import './App.css';
 
 import Footer from './components/Footer';
-import Header from './components/Header';
 import AppNavigation from './components/AppNavigation';
 import Search from './pages/Search';
 import Login from './pages/Login';
@@ -10,10 +9,16 @@ import Register from './pages/Register';
 import About from './pages/About';
 import Home from './pages/Home';
 
+
+// ── Protected Route ──────────────────────────────────────────
+function ProtectedRoute() {
+  const token = localStorage.getItem("token");
+  return token ? <Outlet /> : <Navigate to="/login" replace />;
+}
+
 function AppLayout() {
   return (
     <div className="App" style={{ width: "100%" }}>
-      <Header />
       <AppNavigation />
       <Outlet />
       <Footer />
@@ -24,15 +29,22 @@ function AppLayout() {
 const router = createBrowserRouter([
   {
     path: '/',
-    element : <AppLayout />,
+    element: <AppLayout />,
     children: [
-      {index: true, element: <About />},
-      {path: 'home', element: <Home />},
-      {path: 'search', element: <Search />},
-      {path: 'login', element: <Login />}, 
-      {path: 'register', element: <Register />}
-    ]
-  },
+      { index: true, element: <About /> },
+      { path: 'home', element: <Home /> },
+      { path: 'search', element: <Search /> },
+      { path: 'login', element: <Login /> },
+      { path: 'register', element: <Register /> },
+
+      {
+        element: <AuthenticatedRoute />,
+        children: [
+          { path: 'search', element: <Search /> },
+        ],
+      },
+    ],
+  },  
 ]);
 
 function App() {

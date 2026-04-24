@@ -1,12 +1,19 @@
 import React from "react"
+import {Box} from "@mui/material";
+import { Card, CardContent, CardMedia, Typography } from "@mui/material";
+import Cards from "../components/Cards";
 
 function Home() {
   return (
     <main>
       <Hero />
-      <div id="icon">
-        <img src="/images/home_page.jpg" alt="Icon" />
-      </div>
+      <Box
+        component="img"
+        src="/images/home_page.jpg"
+        alt="Icon"
+        sx={{ width: "100%", height: "100vh", objectFit: "cover", display: "block" }}
+      />
+      <Cards />
     </main>
   )
 }

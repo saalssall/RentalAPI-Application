@@ -1,22 +1,6 @@
-import React from "react"
-import { Redirect, Route } from "react-router-dom"
+import { Navigate, Outlet } from "react-router-dom";
 
-const AuthenticatedRoute = ({ component: Component, ...rest }) => (
-  <Route
-    {...rest}
-    render={(props) =>
-      localStorage.getItem("token") ? (
-        <Component {...props} />
-      ) : (
-        <Redirect
-          to={{
-            pathname: "/login",
-            state: { from: props.location },
-          }}
-        />
-      )
-    }
-  />
-)
-
-export default AuthenticatedRoute
+export default function AuthenticatedRoute() {
+  const token = localStorage.getItem("token");
+  return token ? <Outlet /> : <Navigate to="/login" replace />;
+}

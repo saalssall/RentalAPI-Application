@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
+import AuthenticatedRoute from "./AuthRoute";
+
 import {
   AppBar,
   Toolbar,
@@ -8,7 +10,6 @@ import {
   IconButton,
   Box,
 } from "@mui/material";
-
 
 const navLinks = [
   { label: "About", path: "/" },
@@ -20,10 +21,10 @@ export default function AppNavigation() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [loggedIn, setLoggedIn] = useState(false);
 
-  useEffect(() => {
+useEffect(() => {
     setLoggedIn(!!localStorage.getItem("token"));
-  }, []);
-
+  }, [location]); 
+  
   const handleOpenMenu = (e) => setAnchorEl(e.currentTarget);
   const handleCloseMenu = () => setAnchorEl(null);
 
@@ -39,9 +40,9 @@ export default function AppNavigation() {
   });
 
   return (
-    <AppBar position="static">
+    <AppBar position="static" sx={{ backgroundColor: "#1B4332" }}>
       <Toolbar sx={{ justifyContent: "space-between" }}>
-
+  
         {/* Brand */}
         <Typography
           variant="h6"
