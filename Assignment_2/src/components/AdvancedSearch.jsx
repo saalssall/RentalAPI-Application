@@ -7,14 +7,10 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import RatingDialog from "../components/Rating";
 import API_URL from "../constants/api";
+import COLORS from "../constants/colors";
+import STATES from "../constants/states";
+import PROPERTY_TYPES from "../constants/property_types";
 
-const COLORS = { dark: "#1B4332", light: "#D4EDBA", muted: "#A8D5A2" };
-
-const STATES = ["ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC", "WA"];
-const PROPERTY_TYPES = [
-  "acreage/semi-rural", "apartment", "duplex/semi-detached", "flat",
-  "house", "other", "studio", "terrace", "townhouse", "unit", "villa",
-];
 const SORT_FIELDS = [
   "id", "title", "rent", "propertyType", "postcode", "state", "suburb",
   "bathrooms", "bedrooms", "parkingSpaces", "averageRating", "numRatings",
@@ -114,10 +110,10 @@ export default function AdvancedSearch() {
                     onClick={() => setFilters((prev) => ({ ...prev, state: prev.state === s ? "" : s }))}
                     sx={{
                       borderRadius: "50px", fontWeight: 600,
-                      backgroundColor: filters.state === s ? COLORS.dark : "#fff",
-                      color: filters.state === s ? "#fff" : COLORS.dark,
+                      backgroundColor: filters.state === s ? COLORS.darkgreen : COLORS.muted,
+                      color: filters.state === s ?  COLORS.white : COLORS.dark,
                       border: `2px solid ${COLORS.dark}`,
-                      "&:hover": { backgroundColor: filters.state === s ? "#2D6A4F" : COLORS.muted },
+                      "&:hover": { backgroundColor: filters.state === s ? COLORS.darkgreen : COLORS.muted },
                     }}
                   />
                 ))}
@@ -201,10 +197,10 @@ export default function AdvancedSearch() {
                   <Chip key={type} label={type} onClick={() => togglePropertyType(type)}
                     sx={{
                       borderRadius: "50px", fontWeight: 600, textTransform: "capitalize",
-                      backgroundColor: filters.propertyTypes.includes(type) ? COLORS.dark : "#fff",
-                      color: filters.propertyTypes.includes(type) ? "#fff" : COLORS.dark,
+                      backgroundColor: filters.propertyTypes.includes(type) ? COLORS.darkgreen : COLORS.muted,
+                      color: filters.propertyTypes.includes(type) ? COLORS.white : COLORS.dark,
                       border: `2px solid ${COLORS.dark}`,
-                      "&:hover": { backgroundColor: filters.propertyTypes.includes(type) ? "#2D6A4F" : COLORS.muted },
+                      "&:hover": { backgroundColor: filters.propertyTypes.includes(type) ? COLORS.muted : COLORS.muted },
                     }}
                   />
                 ))}
@@ -216,10 +212,10 @@ export default function AdvancedSearch() {
               <Button variant="contained"
                 startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <SearchIcon />}
                 onClick={handleSearch} disabled={loading}
-                sx={{ backgroundColor: COLORS.dark, "&:hover": { backgroundColor: "#2D6A4F" } }}>
+                sx={{ backgroundColor: COLORS.darkgreen, "&:hover": { backgroundColor: COLORS.yellow } }}>
                 {loading ? "Searching..." : "Search"}
               </Button>
-              <Button variant="outlined" onClick={handleReset} sx={{ borderColor: COLORS.dark, color: COLORS.dark }}>
+              <Button variant="outlined" onClick={handleReset} sx={{ borderColor: COLORS.darkgreen, color: COLORS.darkgreen, "&:hover": { backgroundColor: COLORS.yellow } }}>
                 Reset
               </Button>
             </Grid>
@@ -263,8 +259,8 @@ export default function AdvancedSearch() {
             <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
               <Pagination count={pagination.lastPage} page={page} onChange={handlePageChange}
                 sx={{
-                  "& .MuiPaginationItem-root": { color: COLORS.dark },
-                  "& .Mui-selected": { backgroundColor: `${COLORS.dark} !important`, color: "#fff" },
+                  "& .MuiPaginationItem-root": { color: COLORS.darkgreen },
+                  "& .Mui-selected": { backgroundColor: `${COLORS.darkgreen} !important`, color: COLORS.muted},
                 }}
               />
             </Box>

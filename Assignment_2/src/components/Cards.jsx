@@ -1,8 +1,7 @@
 import image1 from "../images/home_page.jpg";
 import image2 from "../images/image_2.jpg";
 import image3 from "../images/image_3.jpg";
-
-
+import COLORS from "../constants/colors";
 
 import {
   Card,
@@ -69,10 +68,10 @@ function PropertyCard({ title, location, price, beds, baths, image }) {
         </Typography>
       </CardContent>
       <CardActions>
-        <Button size="small" variant="contained" sx={{ backgroundColor: "#1B4332" }}>
+        <Button size="small" variant="contained" sx={{ backgroundColor: COLORS.darkgreen }}>
           View Details
         </Button>
-        <Button size="small" variant="outlined">
+        <Button size="small" variant="outlined" sx={{ borderColor: COLORS.darkgreen, color: COLORS.darkgreen }}>
           Save
         </Button>
       </CardActions>
@@ -83,7 +82,7 @@ function PropertyCard({ title, location, price, beds, baths, image }) {
 export default function PropertyCards() {
   return (
     <Box sx={{ p: 4 }}>
-      <Typography variant="h4" fontWeight={700} sx={{ mb: 3, color: "#1B4332" }}>
+      <Typography variant="h4" fontWeight={700} sx={{ mb: 3, color: COLORS.darkgreen }}>
         Available Properties
       </Typography>
       <Grid container spacing={3}>
@@ -96,3 +95,6 @@ export default function PropertyCards() {
     </Box>
   );
 }
+
+//To do:
+//Make this functional by fetching real data from the backend and implementing pagination, filtering, and sorting.

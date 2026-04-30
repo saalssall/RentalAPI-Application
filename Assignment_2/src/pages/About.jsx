@@ -24,8 +24,8 @@ const Hero = () => (
   }}>
     <Box sx={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(0,0,0,0.6), transparent)", pointerEvents: "none" }} />
     <Box sx={{ position: "relative", color: COLORS.white, maxWidth: 520 }}>
-      <Typography variant="overline" sx={{ letterSpacing: 3, color: COLORS.muted }}>About Us</Typography>
-      <Typography variant="h3" fontWeight={800} sx={{ mt: 1, mb: 3, lineHeight: 1.2 }} color={COLORS.yellow}>
+      <Typography variant="overline" sx={{ letterSpacing: 3, color: COLORS.yellow }}>About Us</Typography>
+      <Typography variant="h3" fontWeight={800} sx={{ mt: 1, mb: 3, lineHeight: 1.2 }} color={COLORS.white}>
         Finding home shouldn't be hard.
       </Typography>
       <Typography variant="body1" sx={{ lineHeight: 1.9, opacity: 0.9 }}>

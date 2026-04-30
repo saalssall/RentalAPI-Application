@@ -25,7 +25,7 @@ const Hero = () => (
       </Typography>
       <Stack direction="row" spacing={2} justifyContent="center">
         <Button variant="contained" size="large" component={Link} to="/search"
-          sx={{ backgroundColor: COLORS.yellow, color: COLORS.dark }}>
+          sx={{ backgroundColor: COLORS.darkgreen, color: COLORS.dark }}>
           View Properties
         </Button>
         <Button variant="outlined" size="large" component={Link} to="/search"

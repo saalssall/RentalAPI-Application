@@ -1,4 +1,5 @@
 import { Map, Marker } from "pigeon-maps";
+import COLORS from "../constants/colors";
 
 export default function PropertyMap({ property }) {
   if (!property?.latitude || !property?.longitude) {
@@ -16,7 +17,7 @@ export default function PropertyMap({ property }) {
     >
       <Marker
         anchor={center}
-        color="#1B4332"
+        color={COLORS.darkgreen}
       />
     </Map>
   );

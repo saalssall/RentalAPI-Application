@@ -12,7 +12,7 @@ const NAV_LINKS = [
 ];
 
 const activeStyle = ({ isActive }) => ({
-  color: isActive ? COLORS.yellow : "white",
+  color: isActive ? COLORS.muted : COLORS.white,
   textDecoration: "none",
 });
 
@@ -47,16 +47,15 @@ export default function AppNavigation() {
         {/* Search bar */}
         <Box component="form" onSubmit={handleSearch} sx={{
           display: "flex", alignItems: "center",
-          backgroundColor: "rgba(255,255,255,0.15)", borderRadius: 2,
+          backgroundColor: COLORS.greyish, borderRadius: 2,
           px: 2, py: 0.5, flex: 1, maxWidth: 400,
-          "&:hover": { backgroundColor: "rgba(255,255,255,0.25)" },
         }}>
-          <SearchIcon sx={{ color: "white", mr: 1 }} />
+          <SearchIcon sx={{ color: COLORS.white, mr: 1 }} />
           <InputBase
             placeholder="Search properties..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            sx={{ color: "white", flex: 1, "& ::placeholder": { color: "rgba(255,255,255,0.7)" } }}
+            sx={{ color: COLORS.white, flex: 1, "& ::placeholder": { color: COLORS.greyish } }}
           />
         </Box>
 
@@ -71,7 +70,7 @@ export default function AppNavigation() {
           {loggedIn ? (
             <>
               <Button component={NavLink} to="/my-ratings" style={activeStyle}>My Ratings</Button>
-              <Button sx={{ color: "white" }} onClick={handleLogout}>Logout</Button>
+              <Button sx={{ color: COLORS.white }} onClick={handleLogout}>Logout</Button>
             </>
           ) : (
             <>

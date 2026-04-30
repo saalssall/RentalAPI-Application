@@ -1,3 +1,6 @@
-const PROPERTY_TYPES = ["Any", "Apartment", "House", "Townhouse", "Unit", "Studio", "Villa"];
+const PROPERTY_TYPES = [
+  "acreage/semi-rural", "apartment", "duplex/semi-detached", "flat",
+  "house", "other", "studio", "terrace", "townhouse", "unit", "villa",
+];
 
 export default PROPERTY_TYPES;
