@@ -42,7 +42,7 @@ export default function Footer() {
       {/* Copyright */}
       <Box sx={{ borderTop: "1px solid #A8D5A2", mt: 3, pt: 2, textAlign: "center" }}>
         <Typography variant="body2" sx={{ color: "#A8D5A2" }}>
-          © 2024 Rental Search. All rights reserved.
+          © 2026 Hamidullah Rezae. All rights reserved.
         </Typography>
       </Box>
     </Box>

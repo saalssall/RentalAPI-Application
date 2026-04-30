@@ -1,20 +1,22 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Box, Typography, TextField, MenuItem, Select, FormControl,
   InputLabel, Button, Grid, Card, CardContent, Divider,
   Alert, CircularProgress, Chip, Pagination,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import TuneIcon from "@mui/icons-material/Tune";
 import RatingDialog from "../components/Rating";
+import API_URL from "../constants/api";
+import COLORS from "../constants/colors";
+import STATES from "../constants/states";
+import PROPERTY_TYPES from "../constants/property_types";
 
-const API_URL = "http://4.237.58.241:3000";
-const STATES = ["ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC", "WA"];
-const PROPERTY_TYPES = ["Any", "Apartment", "House", "Townhouse", "Unit", "Studio", "Villa"];
 const MIN_FIELDS = ["bedrooms", "bathrooms", "parking"];
-const COLORS = { dark: "#1B4332", light: "#D4EDBA", muted: "#A8D5A2" };
+const DEFAULT_MINS = { bedrooms: "", bathrooms: "", parking: "" };
 
-const DEFAULT_MINS = { bedrooms: 0, bathrooms: 0, parking: 0 };
-
+// ── Search Page ──────────────────────────────────────────
 export default function Search() {
   const [state, setState] = useState("");
   const [postcode, setPostcode] = useState("");
@@ -28,9 +30,10 @@ export default function Search() {
   const [searched, setSearched] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
 
+  // Handler for minimum fields to ensure non-negative values
   const handleMin = (field) => (e) =>
     setMins((prev) => ({ ...prev, [field]: Math.max(0, Number(e.target.value)) }));
-
+  // Fetch search results based on filters and pagination
   async function fetchResults(currentPage = 1) {
     setLoading(true);
     setError(null);
@@ -63,7 +66,7 @@ export default function Search() {
       setLoading(false);
     }
   }
-
+  // Handlers for search, pagination, and reset
   function handleSearch() { setSearched(true); setPage(1); fetchResults(1); }
   function handlePageChange(_, newPage) { setPage(newPage); fetchResults(newPage); window.scrollTo({ top: 0, behavior: "smooth" }); }
   function handleReset() {
@@ -73,7 +76,7 @@ export default function Search() {
 
   return (
     <Box sx={{ p: 4, backgroundColor: COLORS.light, minHeight: "100vh" }}>
-      <Typography variant="h4" fontWeight={700} color={COLORS.dark} sx={{ mb: 3 }}>
+      <Typography variant="h4" fontWeight={700} color={COLORS.darkgreen} sx={{ mb: 3 }}>
         Search Rentals
       </Typography>
 
@@ -88,10 +91,10 @@ export default function Search() {
                   <Chip key={s} label={s} onClick={() => setState(state === s ? "" : s)}
                     sx={{
                       borderRadius: "50px", fontWeight: 600,
-                      backgroundColor: state === s ? COLORS.dark : "#fff",
-                      color: state === s ? "#fff" : COLORS.dark,
-                      border: `2px solid ${COLORS.dark}`,
-                      "&:hover": { backgroundColor: state === s ? "#2D6A4F" : COLORS.muted },
+                      backgroundColor: state === s ? COLORS.darkgreen : COLORS.white,
+                      color: state === s ? COLORS.white : COLORS.darkgreen,
+                      border: `2px solid ${COLORS.darkgreen}`,
+                      "&:hover": { backgroundColor: state === s ? COLORS.darkgreen : COLORS.muted },
                     }}
                   />
                 ))}
@@ -111,8 +114,7 @@ export default function Search() {
                 </Select>
               </FormControl>
             </Grid>
-
-            {/* Min filters */}
+            {/* Minimum Fields */}
             {MIN_FIELDS.map((field) => (
               <Grid item xs={12} sm={4} key={field}>
                 <TextField
@@ -123,15 +125,22 @@ export default function Search() {
               </Grid>
             ))}
 
-            <Grid item xs={12} sx={{ display: "flex", gap: 2 }}>
+            {/* Buttons */}
+            <Grid item xs={12} sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
               <Button variant="contained"
                 startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <SearchIcon />}
                 onClick={handleSearch} disabled={loading}
-                sx={{ backgroundColor: COLORS.dark, "&:hover": { backgroundColor: "#2D6A4F" } }}>
+                sx={{ backgroundColor: COLORS.darkgreen, "&:hover": { backgroundColor: COLORS.yellow } }}>
                 {loading ? "Searching..." : "Search"}
               </Button>
-              <Button variant="outlined" onClick={handleReset} sx={{ borderColor: COLORS.dark, color: COLORS.dark }}>
+              <Button variant="outlined" onClick={handleReset}
+                sx={{ borderColor: COLORS.darkgreen, color: COLORS.darkgreen, "&:hover": { backgroundColor: COLORS.yellow } }}>
                 Reset
+              </Button>
+              <Button variant="outlined" component={Link} to="/advanced-search"
+                startIcon={<TuneIcon />}
+                sx={{ borderColor: COLORS.darkgreen, color: COLORS.darkgreen, ml: "auto", "&:hover": { backgroundColor: COLORS.yellow } }}>
+                Advanced Search
               </Button>
             </Grid>
 
@@ -169,13 +178,13 @@ export default function Search() {
               </Grid>
             ))}
           </Grid>
-
+          {/* Pagination */}
           {pagination && (
             <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
               <Pagination count={pagination.lastPage} page={page} onChange={handlePageChange}
                 sx={{
                   "& .MuiPaginationItem-root": { color: COLORS.dark },
-                  "& .Mui-selected": { backgroundColor: `${COLORS.dark} !important`, color: "#fff" },
+                  "& .Mui-selected": { backgroundColor: `${COLORS.dark} !important`, color: COLORS.darkgreen },
                 }}
               />
             </Box>

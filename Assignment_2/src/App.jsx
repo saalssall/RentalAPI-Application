@@ -9,6 +9,8 @@ import Register from './pages/Register';
 import About from './pages/About';
 import Home from './pages/Home';
 import AuthenticatedRoute from './components/AuthRoute';
+import AdvancedSearch from "./components/AdvancedSearch";
+import MyRatings from "./pages/MyRatings";
 
 
 // ── Protected Route ──────────────────────────────────────────
@@ -34,10 +36,11 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <About /> },
       { path: 'home', element: <Home /> },
+      { path: 'advanced-search', element: <AdvancedSearch /> },
       { path: 'search', element: <Search /> },
       { path: 'login', element: <Login /> },
       { path: 'register', element: <Register /> },
-
+      { path: 'my-ratings', element: <MyRatings /> },
       {
         element: <AuthenticatedRoute />,
         children: [

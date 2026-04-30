@@ -1,3 +1,8 @@
+import image1 from "../images/home_page.jpg";
+import image2 from "../images/image_2.jpg";
+import image3 from "../images/image_3.jpg";
+
+
 
 import {
   Card,
@@ -18,7 +23,7 @@ const properties = [
     price: "$450/week",
     beds: 3,
     baths: 2,
-    image: "/images/home_page.jpg",
+    image: image1,
   },
   {
     id: 2,
@@ -27,7 +32,7 @@ const properties = [
     price: "$550/week",
     beds: 2,
     baths: 1,
-    image: "/images/home_page.jpg",
+    image: image2,
   },
   {
     id: 3,
@@ -36,7 +41,7 @@ const properties = [
     price: "$750/week",
     beds: 4,
     baths: 3,
-    image: "/images/home_page.jpg",
+    image: image3,
   },
 ];
 

@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
-import { NavLink } from "react-router-dom";
-import { AppBar, Toolbar, Button, Box } from "@mui/material";
-import logo from "/images/logo.png"; // update path if needed
+import { NavLink, useNavigate } from "react-router-dom";
+import { AppBar, Toolbar, Button, Box, InputBase } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import logo from "../images/logo.png";
+import COLORS from "../constants/colors";
 
 const NAV_LINKS = [
   { label: "About", path: "/" },
@@ -10,12 +12,14 @@ const NAV_LINKS = [
 ];
 
 const activeStyle = ({ isActive }) => ({
-  color: isActive ? "yellow" : "white",
+  color: isActive ? COLORS.yellow : "white",
   textDecoration: "none",
 });
 
 export default function AppNavigation() {
   const [loggedIn, setLoggedIn] = useState(!!localStorage.getItem("token"));
+  const [query, setQuery] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     setLoggedIn(!!localStorage.getItem("token"));
@@ -26,13 +30,34 @@ export default function AppNavigation() {
     setLoggedIn(false);
   };
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (query.trim()) navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+  };
+
   return (
-    <AppBar position="static" sx={{ backgroundColor: "#1B4332" }}>
-      <Toolbar sx={{ justifyContent: "space-between" }}>
+    <AppBar position="static" sx={{ backgroundColor: COLORS.darkgreen }}>
+      <Toolbar sx={{ justifyContent: "space-between", gap: 2 }}>
 
         {/* Logo */}
         <Box component={NavLink} to="/">
           <Box component="img" src={logo} alt="Rental Search" sx={{ height: 100 }} />
+        </Box>
+
+        {/* Search bar */}
+        <Box component="form" onSubmit={handleSearch} sx={{
+          display: "flex", alignItems: "center",
+          backgroundColor: "rgba(255,255,255,0.15)", borderRadius: 2,
+          px: 2, py: 0.5, flex: 1, maxWidth: 400,
+          "&:hover": { backgroundColor: "rgba(255,255,255,0.25)" },
+        }}>
+          <SearchIcon sx={{ color: "white", mr: 1 }} />
+          <InputBase
+            placeholder="Search properties..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            sx={{ color: "white", flex: 1, "& ::placeholder": { color: "rgba(255,255,255,0.7)" } }}
+          />
         </Box>
 
         {/* Nav links */}
@@ -44,7 +69,10 @@ export default function AppNavigation() {
           ))}
 
           {loggedIn ? (
-            <Button sx={{ color: "white" }} onClick={handleLogout}>Logout</Button>
+            <>
+              <Button component={NavLink} to="/my-ratings" style={activeStyle}>My Ratings</Button>
+              <Button sx={{ color: "white" }} onClick={handleLogout}>Logout</Button>
+            </>
           ) : (
             <>
               <Button component={NavLink} to="/register" style={activeStyle}>Register</Button>
