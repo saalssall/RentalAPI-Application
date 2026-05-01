@@ -54,20 +54,20 @@ export default function AdvancedSearch() {
     const params = new URLSearchParams({ page: currentPage });
     const add = (key, val) => { if (val !== "" && val !== null) params.append(key, val); };
 
-    add("state",          filters.state);
-    add("suburb",         filters.suburb);
-    add("postcode",       filters.postcode);
-    add("minimumRent",    filters.minimumRent);
-    add("maximumRent",    filters.maximumRent);
-    add("minimumBedrooms",  filters.minimumBedrooms);
-    add("maximumBedrooms",  filters.maximumBedrooms);
+    add("state", filters.state);
+    add("suburb", filters.suburb);
+    add("postcode", filters.postcode);
+    add("minimumRent", filters.minimumRent);
+    add("maximumRent", filters.maximumRent);
+    add("minimumBedrooms", filters.minimumBedrooms);
+    add("maximumBedrooms", filters.maximumBedrooms);
     add("minimumBathrooms", filters.minimumBathrooms);
     add("maximumBathrooms", filters.maximumBathrooms);
-    add("minimumParking",   filters.minimumParking);
-    add("maximumParking",   filters.maximumParking);
-    add("minimumRating",    filters.minimumRating);
-    add("maximumRating",    filters.maximumRating);
-    add("sortBy",           filters.sortBy);
+    add("minimumParking", filters.minimumParking);
+    add("maximumParking", filters.maximumParking);
+    add("minimumRating", filters.minimumRating);
+    add("maximumRating", filters.maximumRating);
+    add("sortBy", filters.sortBy);
     if (filters.sortBy) add("sortOrder", filters.sortOrder);
     filters.propertyTypes.forEach((t) => params.append("propertyTypes", t));
 
@@ -111,7 +111,7 @@ export default function AdvancedSearch() {
                     sx={{
                       borderRadius: "50px", fontWeight: 600,
                       backgroundColor: filters.state === s ? COLORS.darkgreen : COLORS.muted,
-                      color: filters.state === s ?  COLORS.white : COLORS.dark,
+                      color: filters.state === s ? COLORS.white : COLORS.dark,
                       border: `2px solid ${COLORS.dark}`,
                       "&:hover": { backgroundColor: filters.state === s ? COLORS.darkgreen : COLORS.muted },
                     }}
@@ -243,11 +243,19 @@ export default function AdvancedSearch() {
                     <Typography variant="subtitle1" fontWeight={700} color={COLORS.dark}>{p.title}</Typography>
                     <Typography variant="body2" fontWeight={600} color={COLORS.dark}>${p.rent}/week</Typography>
                     <Divider sx={{ my: 1 }} />
-                    <Typography variant="body2">🏠 {p.propertyType}</Typography>
-                    <Typography variant="body2">📍 {p.suburb}, {p.state} {p.postcode}</Typography>
-                    <Typography variant="body2">🛏 {p.bedrooms} · 🚿 {p.bathrooms} · 🚗 {p.parkingSpaces}</Typography>
+                    <Typography variant="body2">
+                      <span aria-hidden="true">🏠</span> {p.propertyType}
+                    </Typography>
+                    <Typography variant="body2">
+                      <span aria-hidden="true">📍</span> {p.suburb}, {p.state} {p.postcode}
+                    </Typography>
+                    <Typography variant="body2">
+                      Bedrooms: {p.bedrooms} <span aria-hidden="true">🛏</span> ·{" "}
+                      Bathrooms: {p.bathrooms} <span aria-hidden="true">🚿</span> ·{" "}
+                      Parking: {p.parkingSpaces} <span aria-hidden="true">🚗</span>
+                    </Typography>
                     <Typography variant="body2" fontWeight={600} sx={{ mt: 1, color: COLORS.dark }}>
-                      ⭐ {p.averageRating ?? "No rating"}
+                      Average rating: {p.averageRating ?? "No rating"} <span aria-hidden="true">⭐</span>
                     </Typography>
                   </CardContent>
                 </Card>
@@ -260,7 +268,7 @@ export default function AdvancedSearch() {
               <Pagination count={pagination.lastPage} page={page} onChange={handlePageChange}
                 sx={{
                   "& .MuiPaginationItem-root": { color: COLORS.darkgreen },
-                  "& .Mui-selected": { backgroundColor: `${COLORS.darkgreen} !important`, color: COLORS.muted},
+                  "& .Mui-selected": { backgroundColor: `${COLORS.darkgreen} !important`, color: COLORS.muted },
                 }}
               />
             </Box>

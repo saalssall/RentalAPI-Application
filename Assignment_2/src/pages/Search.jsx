@@ -110,7 +110,7 @@ export default function Search() {
               <FormControl fullWidth>
                 <InputLabel>Property Type</InputLabel>
                 <Select value={propertyType} label="Property Type" onChange={(e) => setPropertyType(e.target.value)}>
-                   <MenuItem value="Any">Any</MenuItem>
+                  <MenuItem value="Any">Any</MenuItem>
                   {PROPERTY_TYPES.map((type) => <MenuItem key={type} value={type}>{type}</MenuItem>)}
                 </Select>
               </FormControl>
@@ -160,6 +160,15 @@ export default function Search() {
             {results.map((p) => (
               <Grid item xs={12} sm={6} md={3} key={p.id}>
                 <Card onClick={() => setSelectedProperty(p)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault(); // prevent page scrolling when Space is pressed (keyboard users)
+                      setSelectedProperty(p);
+                    }
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`Rate ${p.title}`}
                   sx={{
                     borderRadius: 3, boxShadow: 2, height: "100%", cursor: "pointer",
                     transition: "0.3s", "&:hover": { boxShadow: 6, transform: "translateY(-4px)" },
@@ -168,11 +177,19 @@ export default function Search() {
                     <Typography variant="subtitle1" fontWeight={700} color={COLORS.dark}>{p.title}</Typography>
                     <Typography variant="body2" fontWeight={600} color={COLORS.dark}>${p.rent}/week</Typography>
                     <Divider sx={{ my: 1 }} />
-                    <Typography variant="body2">🏠 {p.propertyType}</Typography>
-                    <Typography variant="body2">📍 {p.suburb}, {p.state} {p.postcode}</Typography>
-                    <Typography variant="body2">🛏 {p.bedrooms} · 🚿 {p.bathrooms} · 🚗 {p.parkingSpaces}</Typography>
+                    <Typography variant="body2">
+                      <span aria-hidden="true">🏠</span> {p.propertyType}
+                    </Typography>
+                    <Typography variant="body2">
+                      <span aria-hidden="true">📍</span> {p.suburb}, {p.state} {p.postcode}
+                    </Typography>
+                    <Typography variant="body2">
+                      Bedrooms: {p.bedrooms} <span aria-hidden="true">🛏</span> ·{" "}
+                      Bathrooms: {p.bathrooms} <span aria-hidden="true">🚿</span> ·{" "}
+                      Parking: {p.parkingSpaces} <span aria-hidden="true">🚗</span>
+                    </Typography>
                     <Typography variant="body2" fontWeight={600} sx={{ mt: 1, color: COLORS.dark }}>
-                      ⭐ {p.averageRating ?? "No rating"}
+                      Average rating: {p.averageRating ?? "No rating"} <span aria-hidden="true">⭐</span>
                     </Typography>
                   </CardContent>
                 </Card>
@@ -194,7 +211,7 @@ export default function Search() {
       )}
 
       {searched && !loading && results.length === 0 && !error && (
-        <Alert severity="info">No properties found. Try adjusting your filters.</Alert>
+        <Alert severity="info" role="status">No properties found. Try adjusting your filters.</Alert>
       )}
 
       {!searched && (

@@ -6,6 +6,7 @@ import {
 import { useLocation } from "react-router-dom";
 import API_URL from "../constants/api";
 import COLORS from "../constants/colors";
+import RatingDialog from "../components/Rating";
 
 export default function MyRatings() {
   const [ratings, setRatings] = useState([]);
@@ -14,6 +15,7 @@ export default function MyRatings() {
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [selectedProperty, setSelectedProperty] = useState(null);
   const location = useLocation();
 
   const fetchRatings = useCallback(async (pageNum) => {
@@ -28,18 +30,13 @@ export default function MyRatings() {
       });
       if (!res.ok) throw new Error("Failed to fetch ratings.");
       const json = await res.json();
-      console.log("API response:", json);
 
-      
       const list = Array.isArray(json) ? json : (json.ratings ?? json.data ?? []);
-      console.log("list:", list);
       setRatings(list);
 
       const rentalDetails = {};
-      console.log("keys in first item:", list[0] ? Object.keys(list[0]) : "empty array");
       await Promise.all(
         list.map(async (r) => {
-          console.log("fetching rental:", r.rentalId, `${API_URL}/rentals/${r.rentalId}`);
           try {
             const rentalRes = await fetch(`${API_URL}/rentals/${r.rentalId}`, {
               headers: { Authorization: `Bearer ${token}` }
@@ -47,7 +44,7 @@ export default function MyRatings() {
             if (rentalRes.ok) {
               rentalDetails[r.rentalId] = await rentalRes.json();
             }
-          } catch {}
+          } catch { }
         })
       );
       setRentals(rentalDetails);
@@ -62,7 +59,6 @@ export default function MyRatings() {
     }
   }, []);
 
-  // Single useEffect — location.key re-triggers on every navigation
   useEffect(() => {
     fetchRatings(page);
   }, [page, fetchRatings, location.key]);
@@ -74,15 +70,15 @@ export default function MyRatings() {
       </Typography>
 
       {loading && (
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-          <CircularProgress sx={{ color: COLORS.darkgreen }} />
+        <Box role="status" aria-live="polite" sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+          <CircularProgress aria-label="Loading ratings" sx={{ color: COLORS.darkgreen }} />
         </Box>
       )}
 
-      {error && <Alert severity="error">{error}</Alert>}
+      {error && <Alert severity="error" role="alert">{error}</Alert>}
 
       {!loading && !error && ratings.length === 0 && (
-        <Alert severity="info">You haven't rated any properties yet.</Alert>
+        <Alert severity="info" role="status">You haven't rated any properties yet.</Alert>
       )}
 
       {!loading && ratings.length > 0 && (
@@ -92,7 +88,27 @@ export default function MyRatings() {
               const rental = rentals[r.rentalId];
               return (
                 <Grid item xs={12} sm={6} md={3} key={r.rentalId}>
-                  <Card sx={{ borderRadius: 3, boxShadow: 2, height: "100%" }}>
+                  <Card
+                    onClick={() => {
+                      if (rental) setSelectedProperty({ ...rental, id: rental.id ?? r.rentalId });
+                    }}
+                    onKeyDown={(e) => {
+                      if ((e.key === "Enter" || e.key === " ") && rental) {
+                        e.preventDefault();
+                        setSelectedProperty(rental);
+                      }
+                    }}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`Update rating for ${rental?.title ?? `Rental #${r.rentalId}`}`}
+                    sx={{
+                      borderRadius: 3, boxShadow: 2, height: "100%", cursor: "pointer",
+                      transition: "0.3s",
+                      "&:hover": { boxShadow: 6, transform: "translateY(-4px)" },
+                      "&:focus": { outline: `2px solid ${COLORS.darkgreen}`, outlineOffset: "2px" },
+                      "@media (prefers-reduced-motion: reduce)": { transition: "none", transform: "none" },
+                    }}
+                  >
                     <CardContent>
                       <Typography variant="subtitle1" fontWeight={700} color={COLORS.darkgreen}>
                         {rental?.title ?? `Rental #${r.rentalId}`}
@@ -101,13 +117,19 @@ export default function MyRatings() {
                         {rental ? `$${rental.rent}/week` : ""}
                       </Typography>
                       <Divider sx={{ my: 1 }} />
-                      <Typography variant="body2">🏠 {rental?.propertyType ?? "—"}</Typography>
-                      <Typography variant="body2">📍 {rental ? `${rental.suburb}, ${rental.state} ${rental.postcode}` : "—"}</Typography>
                       <Typography variant="body2">
-                        🛏 {rental?.bedrooms ?? "—"} · 🚿 {rental?.bathrooms ?? "—"} · 🚗 {rental?.parkingSpaces ?? "—"}
+                        <span aria-hidden="true">🏠</span> {rental?.propertyType ?? "—"}
+                      </Typography>
+                      <Typography variant="body2">
+                        <span aria-hidden="true">📍</span> {rental ? `${rental.suburb}, ${rental.state} ${rental.postcode}` : "—"}
+                      </Typography>
+                      <Typography variant="body2">
+                        Bedrooms: {rental?.bedrooms ?? "—"} <span aria-hidden="true">🛏</span> ·{" "}
+                        Bathrooms: {rental?.bathrooms ?? "—"} <span aria-hidden="true">🚿</span> ·{" "}
+                        Parking: {rental?.parkingSpaces ?? "—"} <span aria-hidden="true">🚗</span>
                       </Typography>
                       <Typography variant="body2" fontWeight={600} sx={{ mt: 1, color: COLORS.darkgreen }}>
-                        ⭐ {rental?.averageRating ?? "No rating"}
+                        Average rating: {rental?.averageRating ?? "No rating"} <span aria-hidden="true">⭐</span>
                       </Typography>
                       <Divider sx={{ my: 1 }} />
                       <Typography variant="body2" fontWeight={600} color={COLORS.darkgreen}>
@@ -128,10 +150,23 @@ export default function MyRatings() {
               count={totalPages}
               page={page}
               onChange={(_, value) => setPage(value)}
+              aria-label="Ratings pages"
               sx={{ "& .MuiPaginationItem-root": { color: COLORS.darkgreen } }}
             />
           </Box>
         </>
+      )}
+
+      {/* Rating dialog for updating a rating */}
+      {selectedProperty && (
+        <RatingDialog
+          property={selectedProperty}
+          open={Boolean(selectedProperty)}
+          onClose={() => {
+            setSelectedProperty(null);
+            fetchRatings(page); // re-fetch to show updated rating
+          }}
+        />
       )}
     </Box>
   );

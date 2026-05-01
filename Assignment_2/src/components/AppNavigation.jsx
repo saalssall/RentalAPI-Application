@@ -58,6 +58,7 @@ export default function AppNavigation() {
           <SearchIcon sx={{ color: COLORS.white, mr: 1 }} />
           <InputBase
             placeholder="Search properties..."
+            inputProps={{ "aria-label": "Search properties" }}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             sx={{ color: COLORS.white, flex: 1, "& ::placeholder": { color: COLORS.greyish } }}
