@@ -6,7 +6,6 @@ import {
 import PropertyMap from "./Map";
 import API_URL from "../constants/api";
 import COLORS from "../constants/colors";
-import { saveRating } from "../helpers/ratings";
 
 export default function RatingDialog({ property, open, onClose }) {
   const [tab, setTab] = useState(0);
@@ -15,18 +14,20 @@ export default function RatingDialog({ property, open, onClose }) {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch user's existing rating when dialog opens
   useEffect(() => {
     if (!open || !property) return;
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    fetch(`${API_URL}/rentals/${property.id}/ratings`, {
+    fetch(`${API_URL}/ratings/rentals/${property.id}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) return; // No existing rating, silently ignore
+        return res.json();
+      })
       .then(json => {
-        if (!json.error) {
+        if (json?.rating) {
           setExistingRating(json.rating);
           setRating(json.rating);
         }
@@ -39,7 +40,7 @@ export default function RatingDialog({ property, open, onClose }) {
     if (!token) { setError("You must be logged in to rate a property."); return; }
 
     try {
-      const res = await fetch(`${API_URL}/rentals/${property.id}/ratings`, {
+      const res = await fetch(`${API_URL}/ratings/rentals/${property.id}`, {
         method: "POST",
         headers: {
           accept: "application/json",
@@ -48,13 +49,8 @@ export default function RatingDialog({ property, open, onClose }) {
         },
         body: JSON.stringify({ rating }),
       });
-      const json = await res.json();
-      if (json.error) throw new Error(json.message);
 
-      saveRating(property, rating);
-
-      // Notify MyRatings that localStorage has been updated
-      window.dispatchEvent(new Event("ratingsUpdated"));
+      if (!res.ok) throw new Error("Failed to submit rating.");
 
       setSuccess(true);
       setExistingRating(rating);

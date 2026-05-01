@@ -110,6 +110,7 @@ export default function Search() {
               <FormControl fullWidth>
                 <InputLabel>Property Type</InputLabel>
                 <Select value={propertyType} label="Property Type" onChange={(e) => setPropertyType(e.target.value)}>
+                   <MenuItem value="Any">Any</MenuItem>
                   {PROPERTY_TYPES.map((type) => <MenuItem key={type} value={type}>{type}</MenuItem>)}
                 </Select>
               </FormControl>

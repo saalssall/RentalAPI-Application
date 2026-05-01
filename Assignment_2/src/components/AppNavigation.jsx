@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom"; 
 import { AppBar, Toolbar, Button, Box, InputBase } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import logo from "../images/logo.png";
@@ -20,13 +20,21 @@ export default function AppNavigation() {
   const [loggedIn, setLoggedIn] = useState(!!localStorage.getItem("token"));
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
+  const location = useLocation(); // 👈 this was missing
 
   useEffect(() => {
     setLoggedIn(!!localStorage.getItem("token"));
-  }, [location]);
+  }, [location]); // ✅ now reactive — re-runs on every route change
+
+  useEffect(() => {
+    const handleAuth = () => setLoggedIn(!!localStorage.getItem("token"));
+    window.addEventListener("authChanged", handleAuth);
+    return () => window.removeEventListener("authChanged", handleAuth);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    window.dispatchEvent(new Event("authChanged"));
     setLoggedIn(false);
   };
 
@@ -38,13 +46,10 @@ export default function AppNavigation() {
   return (
     <AppBar position="static" sx={{ backgroundColor: COLORS.darkgreen }}>
       <Toolbar sx={{ justifyContent: "space-between", gap: 2 }}>
-
-        {/* Logo */}
         <Box component={NavLink} to="/">
           <Box component="img" src={logo} alt="Rental Search" sx={{ height: 100 }} />
         </Box>
 
-        {/* Search bar */}
         <Box component="form" onSubmit={handleSearch} sx={{
           display: "flex", alignItems: "center",
           backgroundColor: COLORS.greyish, borderRadius: 2,
@@ -59,14 +64,12 @@ export default function AppNavigation() {
           />
         </Box>
 
-        {/* Nav links */}
         <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
           {NAV_LINKS.map(({ label, path }) => (
             <Button key={label} component={NavLink} to={path} style={activeStyle}>
               {label}
             </Button>
           ))}
-
           {loggedIn ? (
             <>
               <Button component={NavLink} to="/my-ratings" style={activeStyle}>My Ratings</Button>
@@ -79,7 +82,6 @@ export default function AppNavigation() {
             </>
           )}
         </Box>
-
       </Toolbar>
     </AppBar>
   );

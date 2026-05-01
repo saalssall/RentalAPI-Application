@@ -28,7 +28,8 @@ export default function Login() {
           setSuccess("Login successful");
           if (res.token) {
             localStorage.setItem("token", res.token);
-            navigate("/");
+             window.dispatchEvent(new Event("authChanged"));
+            navigate("/home");
           }
         }
       });
