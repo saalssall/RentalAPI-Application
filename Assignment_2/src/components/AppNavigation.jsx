@@ -20,11 +20,11 @@ export default function AppNavigation() {
   const [loggedIn, setLoggedIn] = useState(!!localStorage.getItem("token"));
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
-  const location = useLocation(); // 👈 this was missing
+  const location = useLocation(); 
 
   useEffect(() => {
     setLoggedIn(!!localStorage.getItem("token"));
-  }, [location]); // ✅ now reactive — re-runs on every route change
+  }, [location]); 
 
   useEffect(() => {
     const handleAuth = () => setLoggedIn(!!localStorage.getItem("token"));

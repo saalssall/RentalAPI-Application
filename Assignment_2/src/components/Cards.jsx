@@ -14,6 +14,7 @@ import {
   Box,
 } from "@mui/material";
 
+//Dummy data for demonstration purposes. 
 const properties = [
   {
     id: 1,

@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
-  Box, Typography, Grid, Card, CardContent, Divider,
-  Alert, CircularProgress, Button, Chip, Stack,
+  Box, Typography, Alert, CircularProgress, Button,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import StarRateIcon from "@mui/icons-material/StarRate";
 import API_URL from "../constants/api";
 import COLORS from "../constants/colors";
+import RatingDialog from "../components/Rating";
 import { AgGridReact } from "ag-grid-react";
 import { ModuleRegistry, AllCommunityModule, ClientSideRowModelModule } from "ag-grid-community";
 
@@ -18,15 +19,16 @@ export default function PropertyDetail() {
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [ratingOpen, setRatingOpen] = useState(false);
+
+  const isLoggedIn = !!localStorage.getItem("token");
 
   useEffect(() => {
     if (property) document.title = `${property.title} | Rental Search`;
   }, [property]);
 
   useEffect(() => {
-    fetch(`${API_URL}/rentals/${id}`, {
-      headers: { accept: "application/json" }
-    })
+    fetch(`${API_URL}/rentals/${id}`, { headers: { accept: "application/json" } })
       .then(res => {
         if (!res.ok) throw new Error("Property not found.");
         return res.json();
@@ -48,10 +50,6 @@ export default function PropertyDetail() {
     </Box>
   );
 
-  const amenitiesList = property.amenities
-    ? property.amenities.split(",").map(a => a.trim()).filter(Boolean)
-    : [];
-
   return (
     <Box sx={{ p: 4, backgroundColor: COLORS.light, minHeight: "100vh" }}>
 
@@ -71,23 +69,21 @@ export default function PropertyDetail() {
         <Box sx={{ textAlign: { xs: "left", sm: "right" } }}>
           <Typography variant="h5" fontWeight={700} color={COLORS.darkgreen}>${property.rent}/week</Typography>
           <Typography variant="body2" color="text.secondary">Listed by {property.agencyName}</Typography>
+          {isLoggedIn ? (
+            <Button variant="contained" startIcon={<StarRateIcon />}
+              onClick={() => setRatingOpen(true)}
+              sx={{ mt: 1, backgroundColor: COLORS.darkgreen, "&:hover": { backgroundColor: COLORS.muted } }}>
+              Rate Property
+            </Button>
+          ) : (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              Log in to rate this property
+            </Typography>
+          )}
         </Box>
       </Box>
 
-      <Button
-        variant="contained"
-        onClick={() => setRatingOpen(true)}
-        sx={{
-          mt: 2,
-          backgroundColor: COLORS.darkgreen,
-          "&:hover": { backgroundColor: COLORS.muted }
-        }}
-      >
-        Rate this Property
-      </Button>
-      
-
-      {/* AG Grid Table */}
+      {/* Details Table */}
       <Typography variant="subtitle1" fontWeight={700} color={COLORS.darkgreen} sx={{ mb: 1 }}>
         Property Details
       </Typography>
@@ -107,37 +103,19 @@ export default function PropertyDetail() {
           ]}
           columnDefs={[
             {
-              field: "field",
-              headerName: "Field",
-              flex: 1,
-              cellStyle: {
-                fontWeight: "700",
-                color: COLORS.darkgreen,
-                display: "flex",
-                alignItems: "center",
-                fontSize: "13px",
-              },
+              field: "field", headerName: "Field", flex: 1,
+              cellStyle: { fontWeight: "700", color: COLORS.darkgreen, display: "flex", alignItems: "center", fontSize: "13px" },
             },
             {
-              field: "value",
-              headerName: "Details",
-              flex: 2,
-              wrapText: true,
-              autoHeight: true,
-              cellStyle: {
-                color: "#444",
-                fontSize: "13px",
-                display: "flex",
-                alignItems: "center",
-                lineHeight: "1.5",
-              },
+              field: "value", headerName: "Details", flex: 2, wrapText: true, autoHeight: true,
+              cellStyle: { color: COLORS.whitish, fontSize: "13px", display: "flex", alignItems: "center", lineHeight: "1.5" },
             },
           ]}
           defaultColDef={{ resizable: false, sortable: false }}
           domLayout="autoHeight"
           rowStyle={{ cursor: "default" }}
           getRowStyle={(params) => ({
-            backgroundColor: params.rowIndex % 2 === 0 ? "#f8fdf8" : "#ffffff",
+            backgroundColor: params.rowIndex % 2 === 0 ? COLORS.WHITISH : COLORS.WHITE,
           })}
           headerHeight={40}
           rowHeight={44}
@@ -151,20 +129,25 @@ export default function PropertyDetail() {
             Description
           </Typography>
           <Box sx={{
-            p: 2,
-            backgroundColor: "#f8fdf8",
-            borderRadius: 2,
-            border: `1px solid ${COLORS.darkgreen}30`,
-            maxHeight: 300,
-            overflowY: "auto",
+            p: 2, backgroundColor: COLORS.WHITISH, borderRadius: 2,
+            border: `1px solid ${COLORS.darkgreen}30`, maxHeight: 300, overflowY: "auto",
             "&::-webkit-scrollbar": { width: "6px" },
-            "&::-webkit-scrollbar-track": { backgroundColor: "#f0f0f0", borderRadius: "10px" },
+            "&::-webkit-scrollbar-track": { backgroundColor: COLORS.WHITE, borderRadius: "10px" },
             "&::-webkit-scrollbar-thumb": { backgroundColor: COLORS.darkgreen, borderRadius: "10px" },
           }}>
             <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}
               dangerouslySetInnerHTML={{ __html: property.description }} />
           </Box>
         </Box>
+      )}
+
+      {/* Rating Dialog */}
+      {ratingOpen && (
+        <RatingDialog
+          property={{ ...property, id: Number(id) }}
+          open={ratingOpen}
+          onClose={() => setRatingOpen(false)}
+        />
       )}
 
     </Box>

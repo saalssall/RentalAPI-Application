@@ -27,18 +27,23 @@ const DEFAULT_FILTERS = {
 
 export default function AdvancedSearch() {
   const navigate = useNavigate();
+
+  // Filter and data state
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [states, setStates] = useState([]);
+  const [typeOptions, setTypeOptions] = useState([]);
+
+  // Results state
   const [results, setResults] = useState([]);
   const [pagination, setPagination] = useState(null);
   const [page, setPage] = useState(1);
+
+  // UI state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searched, setSearched] = useState(false);
-  const [states, setStates] = useState([]);
-  const [typeOptions, setTypeOptions] = useState([]);
-  const [propertyType, setPropertyType] = useState("Any");
 
-  // Fetch states and property types from API
+  // Fetch states and property types from API on mount
   useEffect(() => {
     fetch(`${API_URL}/rentals/states`, { headers: { accept: "application/json" } })
       .then(res => res.json())
@@ -46,21 +51,24 @@ export default function AdvancedSearch() {
       .catch(() => setStates([]));
 
     fetch(`${API_URL}/rentals/property-types`, { headers: { accept: "application/json" } })
-  .then(res => res.json())
-  .then(json => setTypeOptions(Array.isArray(json) ? json : []))
-  .catch(() => setTypeOptions([]));
+      .then(res => res.json())
+      .then(json => setTypeOptions(Array.isArray(json) ? json : []))
+      .catch(() => setTypeOptions([]));
   }, []);
 
-  const set = (field) => (e) => setFilters((prev) => ({ ...prev, [field]: e.target.value }));
+  // Generic field setter for filter inputs
+  const set = (field) => (e) => setFilters(prev => ({ ...prev, [field]: e.target.value }));
 
+  // Toggle a property type chip on/off
   const togglePropertyType = (type) =>
-    setFilters((prev) => ({
+    setFilters(prev => ({
       ...prev,
       propertyTypes: prev.propertyTypes.includes(type)
-        ? prev.propertyTypes.filter((t) => t !== type)
+        ? prev.propertyTypes.filter(t => t !== type)
         : [...prev.propertyTypes, type],
     }));
 
+  // Build query params and fetch results from the search endpoint
   async function fetchResults(currentPage = 1) {
     setLoading(true);
     setError(null);
@@ -83,7 +91,7 @@ export default function AdvancedSearch() {
     add("maximumRating", filters.maximumRating);
     add("sortBy", filters.sortBy);
     if (filters.sortBy) add("sortOrder", filters.sortOrder);
-    filters.propertyTypes.forEach((t) => params.append("propertyTypes", t));
+    filters.propertyTypes.forEach(t => params.append("propertyTypes", t));
 
     try {
       const res = await fetch(`${API_URL}/rentals/search?${params}`, {
@@ -111,19 +119,19 @@ export default function AdvancedSearch() {
         Advanced Search
       </Typography>
 
+      {/* Filter Panel */}
       <Card sx={{ p: 3, borderRadius: 3, boxShadow: 3, mb: 4 }}>
         <CardContent>
           <Grid container spacing={3}>
 
-            {/* State — from API */}
+            {/* State chips */}
             <Grid item xs={12}>
               <Typography variant="subtitle1" fontWeight={600} color={COLORS.dark} sx={{ mb: 1 }}>State</Typography>
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {(states ?? []).map((s) => (
+                {(states ?? []).map(s => (
                   <Chip key={s} label={s}
-                    onClick={() => setFilters((prev) => ({ ...prev, state: prev.state === s ? "" : s }))}
-                    aria-pressed={filters.state === s}
-                    role="button"
+                    onClick={() => setFilters(prev => ({ ...prev, state: prev.state === s ? "" : s }))}
+                    aria-pressed={filters.state === s} role="button"
                     sx={{
                       borderRadius: "50px", fontWeight: 600,
                       backgroundColor: filters.state === s ? COLORS.darkgreen : COLORS.muted,
@@ -139,62 +147,40 @@ export default function AdvancedSearch() {
             <Grid item xs={12} sm={4}>
               <TextField label="Suburb" value={filters.suburb} onChange={set("suburb")} fullWidth />
             </Grid>
-
             <Grid item xs={12} sm={4}>
               <TextField label="Postcode" value={filters.postcode} onChange={set("postcode")} inputProps={{ maxLength: 4 }} fullWidth />
             </Grid>
 
             {/* Rent range */}
-            <Grid item xs={12} sm={3}>
-              <TextField label="Min Rent ($/week)" type="number" value={filters.minimumRent} onChange={set("minimumRent")} inputProps={{ min: 0 }} fullWidth />
-            </Grid>
-            <Grid item xs={12} sm={3}>
-              <TextField label="Max Rent ($/week)" type="number" value={filters.maximumRent} onChange={set("maximumRent")} inputProps={{ min: 0 }} fullWidth />
-            </Grid>
+            <Grid item xs={12} sm={3}><TextField label="Min Rent ($/week)" type="number" value={filters.minimumRent} onChange={set("minimumRent")} inputProps={{ min: 0 }} fullWidth /></Grid>
+            <Grid item xs={12} sm={3}><TextField label="Max Rent ($/week)" type="number" value={filters.maximumRent} onChange={set("maximumRent")} inputProps={{ min: 0 }} fullWidth /></Grid>
 
             {/* Bedrooms range */}
-            <Grid item xs={12} sm={3}>
-              <TextField label="Min Bedrooms" type="number" value={filters.minimumBedrooms} onChange={set("minimumBedrooms")} inputProps={{ min: 0 }} fullWidth />
-            </Grid>
-            <Grid item xs={12} sm={3}>
-              <TextField label="Max Bedrooms" type="number" value={filters.maximumBedrooms} onChange={set("maximumBedrooms")} inputProps={{ min: 0 }} fullWidth />
-            </Grid>
+            <Grid item xs={12} sm={3}><TextField label="Min Bedrooms" type="number" value={filters.minimumBedrooms} onChange={set("minimumBedrooms")} inputProps={{ min: 0 }} fullWidth /></Grid>
+            <Grid item xs={12} sm={3}><TextField label="Max Bedrooms" type="number" value={filters.maximumBedrooms} onChange={set("maximumBedrooms")} inputProps={{ min: 0 }} fullWidth /></Grid>
 
             {/* Bathrooms range */}
-            <Grid item xs={12} sm={3}>
-              <TextField label="Min Bathrooms" type="number" value={filters.minimumBathrooms} onChange={set("minimumBathrooms")} inputProps={{ min: 0 }} fullWidth />
-            </Grid>
-            <Grid item xs={12} sm={3}>
-              <TextField label="Max Bathrooms" type="number" value={filters.maximumBathrooms} onChange={set("maximumBathrooms")} inputProps={{ min: 0 }} fullWidth />
-            </Grid>
+            <Grid item xs={12} sm={3}><TextField label="Min Bathrooms" type="number" value={filters.minimumBathrooms} onChange={set("minimumBathrooms")} inputProps={{ min: 0 }} fullWidth /></Grid>
+            <Grid item xs={12} sm={3}><TextField label="Max Bathrooms" type="number" value={filters.maximumBathrooms} onChange={set("maximumBathrooms")} inputProps={{ min: 0 }} fullWidth /></Grid>
 
             {/* Parking range */}
-            <Grid item xs={12} sm={3}>
-              <TextField label="Min Parking" type="number" value={filters.minimumParking} onChange={set("minimumParking")} inputProps={{ min: 0 }} fullWidth />
-            </Grid>
-            <Grid item xs={12} sm={3}>
-              <TextField label="Max Parking" type="number" value={filters.maximumParking} onChange={set("maximumParking")} inputProps={{ min: 0 }} fullWidth />
-            </Grid>
+            <Grid item xs={12} sm={3}><TextField label="Min Parking" type="number" value={filters.minimumParking} onChange={set("minimumParking")} inputProps={{ min: 0 }} fullWidth /></Grid>
+            <Grid item xs={12} sm={3}><TextField label="Max Parking" type="number" value={filters.maximumParking} onChange={set("maximumParking")} inputProps={{ min: 0 }} fullWidth /></Grid>
 
             {/* Rating range */}
-            <Grid item xs={12} sm={3}>
-              <TextField label="Min Rating" type="number" value={filters.minimumRating} onChange={set("minimumRating")} inputProps={{ min: 0, max: 5, step: 0.5 }} fullWidth />
-            </Grid>
-            <Grid item xs={12} sm={3}>
-              <TextField label="Max Rating" type="number" value={filters.maximumRating} onChange={set("maximumRating")} inputProps={{ min: 0, max: 5, step: 0.5 }} fullWidth />
-            </Grid>
+            <Grid item xs={12} sm={3}><TextField label="Min Rating" type="number" value={filters.minimumRating} onChange={set("minimumRating")} inputProps={{ min: 0, max: 5, step: 0.5 }} fullWidth /></Grid>
+            <Grid item xs={12} sm={3}><TextField label="Max Rating" type="number" value={filters.maximumRating} onChange={set("maximumRating")} inputProps={{ min: 0, max: 5, step: 0.5 }} fullWidth /></Grid>
 
-            {/* Sort */}
+            {/* Sort controls */}
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth>
                 <InputLabel>Sort By</InputLabel>
                 <Select value={filters.sortBy} label="Sort By" onChange={set("sortBy")}>
                   <MenuItem value="">None</MenuItem>
-                  {SORT_FIELDS.map((f) => <MenuItem key={f} value={f}>{f}</MenuItem>)}
+                  {SORT_FIELDS.map(f => <MenuItem key={f} value={f}>{f}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
-
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth disabled={!filters.sortBy}>
                 <InputLabel>Sort Order</InputLabel>
@@ -205,14 +191,13 @@ export default function AdvancedSearch() {
               </FormControl>
             </Grid>
 
-            {/* Property Types */}
+            {/* Property type chips */}
             <Grid item xs={12}>
               <Typography variant="subtitle1" fontWeight={600} color={COLORS.dark} sx={{ mb: 1 }}>Property Types</Typography>
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {(typeOptions ?? []).map((type) => (
+                {(typeOptions ?? []).map(type => (
                   <Chip key={type} label={type} onClick={() => togglePropertyType(type)}
-                    aria-pressed={filters.propertyTypes.includes(type)}
-                    role="button"
+                    aria-pressed={filters.propertyTypes.includes(type)} role="button"
                     sx={{
                       borderRadius: "50px", fontWeight: 600, textTransform: "capitalize",
                       backgroundColor: filters.propertyTypes.includes(type) ? COLORS.darkgreen : COLORS.muted,
@@ -225,11 +210,9 @@ export default function AdvancedSearch() {
               </Box>
             </Grid>
 
-            {/* Buttons */}
             <Grid item xs={12} sx={{ display: "flex", gap: 2 }}>
-              <Button variant="contained"
+              <Button variant="contained" onClick={handleSearch} disabled={loading}
                 startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <SearchIcon />}
-                onClick={handleSearch} disabled={loading}
                 sx={{ backgroundColor: COLORS.darkgreen, "&:hover": { backgroundColor: COLORS.yellow } }}>
                 {loading ? "Searching..." : "Search"}
               </Button>
@@ -245,25 +228,19 @@ export default function AdvancedSearch() {
 
       {error && <Alert severity="error" role="alert" sx={{ mb: 3 }}>{error}</Alert>}
 
+      {/* Search Results */}
       {results.length > 0 && (
         <>
           <Typography variant="h6" fontWeight={600} color={COLORS.dark} sx={{ mb: 2 }}>
             {pagination?.total ?? results.length} Properties Found
           </Typography>
           <Grid container spacing={2}>
-            {results.map((p) => (
+            {results.map(p => (
               <Grid item xs={12} sm={6} md={3} key={p.id}>
                 <Card
                   onClick={() => navigate(`/rentals/${p.id}`)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      navigate(`/rentals/${p.id}`);
-                    }
-                  }}
-                  tabIndex={0}
-                  role="button"
-                  aria-label={`View details for ${p.title}`}
+                  onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate(`/rentals/${p.id}`); } }}
+                  tabIndex={0} role="button" aria-label={`View details for ${p.title}`}
                   sx={{
                     borderRadius: 3, boxShadow: 2, height: "100%", cursor: "pointer",
                     transition: "0.3s", "&:hover": { boxShadow: 6, transform: "translateY(-4px)" },
@@ -274,12 +251,8 @@ export default function AdvancedSearch() {
                     <Typography variant="subtitle1" fontWeight={700} color={COLORS.dark}>{p.title}</Typography>
                     <Typography variant="body2" fontWeight={600} color={COLORS.dark}>${p.rent}/week</Typography>
                     <Divider sx={{ my: 1 }} />
-                    <Typography variant="body2">
-                      <span aria-hidden="true">🏠</span> {p.propertyType}
-                    </Typography>
-                    <Typography variant="body2">
-                      <span aria-hidden="true">📍</span> {p.suburb}, {p.state} {p.postcode}
-                    </Typography>
+                    <Typography variant="body2"><span aria-hidden="true">🏠</span> {p.propertyType}</Typography>
+                    <Typography variant="body2"><span aria-hidden="true">📍</span> {p.suburb}, {p.state} {p.postcode}</Typography>
                     <Typography variant="body2">
                       Bedrooms: {p.bedrooms} <span aria-hidden="true">🛏</span> ·{" "}
                       Bathrooms: {p.bathrooms} <span aria-hidden="true">🚿</span> ·{" "}

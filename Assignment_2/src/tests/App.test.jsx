@@ -6,7 +6,7 @@ import Home      from '../pages/Home';
 import Search    from '../pages/Search';
 import About     from '../pages/About';
 import MyRatings from '../pages/MyRatings';
-import { saveRating, getSavedRatings } from '../helpers/ratings';
+
 
 // ── Shared helpers ───────────────────────────────────────────
 const renderIn = (Component) => render(<MemoryRouter><Component /></MemoryRouter>);

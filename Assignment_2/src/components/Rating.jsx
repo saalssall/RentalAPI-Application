@@ -15,32 +15,31 @@ export default function RatingDialog({ property, open, onClose }) {
   const [tab, setTab] = useState(0);
   const [rating, setRating] = useState(0);
   const [existingRating, setExistingRating] = useState(null);
+  const [existingDateTime, setExistingDateTime] = useState(null);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
 
-useEffect(() => {
-  if (!open || !property) return;
+  useEffect(() => {
+    if (!open || !property) return;
+    const token = localStorage.getItem("token");
+    if (!token) return;
 
-  const token = localStorage.getItem("token");
-  if (!token) return;
-
-  fetch(`${API_URL}/ratings/rentals/${property.id}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  })
-    .then(res => {
-      if (!res.ok) return null;
-      return res.json();
+    fetch(`${API_URL}/ratings/rentals/${property.id}`, {
+      headers: { Authorization: `Bearer ${token}` }
     })
-    .then(json => {
-      const ratingObj = json?.data?.[0];  
-
-      if (ratingObj) {
-        setExistingRating(ratingObj.rating);
-        setRating(ratingObj.rating);
-      }
-    })
-    .catch(() => {});
-}, [open, property]);
+      .then(res => {
+        if (!res.ok) return null;
+        return res.json();
+      })
+      .then(json => {
+        if (json?.rating) {
+          setExistingRating(json.rating);
+          setRating(json.rating);
+          setExistingDateTime(json.dateTime ?? null);
+        }
+      })
+      .catch(() => {});
+  }, [open, property]);
 
   async function handleSubmit() {
     const token = localStorage.getItem("token");
@@ -57,8 +56,19 @@ useEffect(() => {
         body: JSON.stringify({ rating }),
       });
       if (!res.ok) throw new Error("Failed to submit rating.");
+
+      // Re-fetch to get updated rating and dateTime
+      const updated = await fetch(`${API_URL}/ratings/rentals/${property.id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const json = await updated.json();
+      if (json?.rating) {
+        setExistingRating(json.rating);
+        setRating(json.rating);
+        setExistingDateTime(json.dateTime ?? null);
+      }
+
       setSuccess(true);
-      setExistingRating(rating);
       setError(null);
     } catch (err) {
       setError(err.message || "Failed to submit rating.");
@@ -67,14 +77,14 @@ useEffect(() => {
 
   function handleClose() {
     setRating(0); setSuccess(false); setError(null);
-    setTab(0); setExistingRating(null);
+    setTab(0); setExistingRating(null); setExistingDateTime(null);
     onClose();
   }
 
   return (
     <Dialog
       open={open}
-      onClose={true}
+      onClose={handleClose}
       maxWidth="lg"
       fullWidth
       fullScreen={fullScreen}
@@ -104,12 +114,16 @@ useEffect(() => {
 
             {existingRating && !success && (
               <Alert severity="info" sx={{ mb: 2 }}>
-                You previously rated this property {existingRating} star{existingRating !== 1 ? "s" : ""}. Submitting will update your rating.
+                You previously rated this property {existingRating} star{existingRating !== 1 ? "s" : ""} on{" "}
+                {existingDateTime ? new Date(existingDateTime).toLocaleString() : "unknown date"}.
+                Submitting will update your rating.
               </Alert>
             )}
 
             {success ? (
-              <Alert severity="success" role="alert">Rating submitted successfully!</Alert>
+              <Alert severity="success" role="alert">
+                Rating submitted successfully!{existingDateTime && ` Rated on ${new Date(existingDateTime).toLocaleString()}`}
+              </Alert>
             ) : (
               <>
                 {error && <Alert severity="error" role="alert" sx={{ mb: 2 }}>{error}</Alert>}
@@ -126,6 +140,7 @@ useEffect(() => {
         {tab === 1 && (
           <Box sx={{ height: "100%", minHeight: 450, width: "100%", mt: 1 }}>
             <PropertyMap property={property} />
+            Latitude: {property?.latitude ?? "N/A"}, Longitude: {property?.longitude ?? "N/A"}
           </Box>
         )}
 

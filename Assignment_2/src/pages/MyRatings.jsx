@@ -24,13 +24,13 @@ export default function MyRatings() {
 
     setLoading(true);
     setError(null);
+
     try {
       const res = await fetch(`${API_URL}/ratings?page=${pageNum}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!res.ok) throw new Error("Failed to fetch ratings.");
       const json = await res.json();
-
       const list = Array.isArray(json) ? json : (json.ratings ?? json.data ?? []);
       setRatings(list);
 
@@ -41,16 +41,12 @@ export default function MyRatings() {
             const rentalRes = await fetch(`${API_URL}/rentals/${r.rentalId}`, {
               headers: { Authorization: `Bearer ${token}` }
             });
-            if (rentalRes.ok) {
-              rentalDetails[r.rentalId] = await rentalRes.json();
-            }
-          } catch { }
+            if (rentalRes.ok) rentalDetails[r.rentalId] = await rentalRes.json();
+          } catch {}
         })
       );
       setRentals(rentalDetails);
-
-      if (list.length < 20) setTotalPages(pageNum);
-      else setTotalPages(pageNum + 1);
+      setTotalPages(list.length < 20 ? pageNum : pageNum + 1);
 
     } catch (err) {
       setError(err.message || "Something went wrong.");
@@ -89,13 +85,11 @@ export default function MyRatings() {
               return (
                 <Grid item xs={12} sm={6} md={3} key={r.rentalId}>
                   <Card
-                    onClick={() => {
-                      if (rental) setSelectedProperty({ ...rental, id: rental.id ?? r.rentalId });
-                    }}
+                    onClick={() => rental && setSelectedProperty({ ...rental, id: rental.id ?? r.rentalId })}
                     onKeyDown={(e) => {
                       if ((e.key === "Enter" || e.key === " ") && rental) {
                         e.preventDefault();
-                        setSelectedProperty(rental);
+                        setSelectedProperty({ ...rental, id: rental.id ?? r.rentalId });
                       }
                     }}
                     tabIndex={0}
@@ -136,7 +130,7 @@ export default function MyRatings() {
                         Your rating: {r.rating} / 5
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Rated on {r.dateTime ? new Date(r.dateTime).toLocaleDateString() : "Unknown date"}
+                        Rated on {r.dateTime ? new Date(r.dateTime).toLocaleString() : "Unknown date"}
                       </Typography>
                     </CardContent>
                   </Card>
@@ -157,18 +151,14 @@ export default function MyRatings() {
         </>
       )}
 
-      {/* Rating dialog for updating a rating */}
       {selectedProperty && (
         <RatingDialog
           property={selectedProperty}
           open={Boolean(selectedProperty)}
-          onClose={(updated) => {
-
-  setSelectedProperty(null);
-
-  if (updated) fetchRatings(page);
-
-}}
+          onClose={() => {
+            setSelectedProperty(null);
+            fetchRatings(page);
+          }}
         />
       )}
     </Box>

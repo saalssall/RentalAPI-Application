@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
-  Box, Typography, TextField, MenuItem, Select, FormControl,
-  InputLabel, Button, Grid, Card, CardContent, Divider,
-  Alert, CircularProgress, Chip, Pagination,
+  Box, Typography, TextField, Button, Grid, Card, CardContent,
+  Divider, Alert, CircularProgress, Chip, Pagination,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import TuneIcon from "@mui/icons-material/Tune";
@@ -15,18 +14,25 @@ const DEFAULT_MINS = { bedrooms: "", bathrooms: "", parking: "" };
 
 export default function Search() {
   const navigate = useNavigate();
+
+  // Filter state
   const [state, setState] = useState("");
   const [rentalId, setRentalId] = useState("");
   const [postcode, setPostcode] = useState("");
-  const [states, setStates] = useState([]);
   const [mins, setMins] = useState(DEFAULT_MINS);
+
+  // Data state
+  const [states, setStates] = useState([]);
   const [results, setResults] = useState([]);
   const [pagination, setPagination] = useState(null);
   const [page, setPage] = useState(1);
+
+  // UI state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searched, setSearched] = useState(false);
 
+  // Fetch available states from API on mount
   useEffect(() => {
     fetch(`${API_URL}/rentals/states`, { headers: { accept: "application/json" } })
       .then(res => res.json())
@@ -35,36 +41,25 @@ export default function Search() {
   }, []);
 
   const handleMin = (field) => (e) =>
-    setMins((prev) => ({ ...prev, [field]: Math.max(0, Number(e.target.value)) }));
+    setMins(prev => ({ ...prev, [field]: Math.max(0, Number(e.target.value)) }));
 
+  // If rental ID is entered, navigate directly to property detail page.
+  // Otherwise, fetch search results using filters.
   async function fetchResults(currentPage = 1) {
     setLoading(true);
     setError(null);
 
-    // If rental ID is entered, fetch directly by ID
     if (rentalId.trim()) {
-      try {
-        const res = await fetch(`${API_URL}/rentals/${rentalId.trim()}`, {
-          headers: { accept: "application/json" }
-        });
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.message || "Property not found.");
-        setResults([json]);
-        setPagination(null);
-      } catch (err) {
-        setError(err.message || "Failed to fetch property.");
-        setResults([]);
-      } finally {
-        setLoading(false);
-      }
+      navigate(`/rentals/${rentalId.trim()}`);
+      setLoading(false);
       return;
     }
 
-    // Otherwise proceed with normal search
     const base = { page: null, ...(state && { state }), ...(postcode && { postcode }) };
     const makeParams = (p) => new URLSearchParams({ ...base, page: p });
 
     try {
+      // Fetch two pages in parallel to get more results per view
       const [res1, res2] = await Promise.all([
         fetch(`${API_URL}/rentals/search?${makeParams(currentPage * 2 - 1)}`, { headers: { accept: "application/json" } }),
         fetch(`${API_URL}/rentals/search?${makeParams(currentPage * 2)}`, { headers: { accept: "application/json" } }),
@@ -72,8 +67,9 @@ export default function Search() {
       const [json1, json2] = await Promise.all([res1.json(), res2.json()]);
       if (json1.error) throw new Error(json1.message);
 
+      // Combine, filter by minimums, and cap at 12 results
       const combined = [...(json1.data ?? []), ...(json2.data ?? [])]
-        .filter((p) =>
+        .filter(p =>
           p.bedrooms >= mins.bedrooms &&
           p.bathrooms >= mins.bathrooms &&
           p.parkingSpaces >= mins.parking
@@ -103,99 +99,85 @@ export default function Search() {
         Search Rentals
       </Typography>
 
+      {/* Filter Panel */}
       <Card sx={{ p: 3, borderRadius: 3, boxShadow: 3, mb: 4 }}>
-        <CardContent>
-          <Grid container spacing={3}>
+        <Grid container spacing={3}>
 
-            {/* State chips — from API */}
-            <Grid item xs={12}>
-              <Typography variant="subtitle1" fontWeight={600} color={COLORS.dark} sx={{ mb: 1 }}>State</Typography>
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {(states ?? []).map((s) => (
-                  <Chip key={s} label={s} onClick={() => setState(state === s ? "" : s)}
-                    aria-pressed={state === s}
-                    role="button"
-                    sx={{
-                      borderRadius: "50px", fontWeight: 600,
-                      backgroundColor: state === s ? COLORS.darkgreen : COLORS.white,
-                      color: state === s ? COLORS.white : COLORS.darkgreen,
-                      border: `2px solid ${COLORS.darkgreen}`,
-                      "&:hover": { backgroundColor: state === s ? COLORS.darkgreen : COLORS.muted },
-                    }}
-                  />
-                ))}
-              </Box>
-            </Grid>
+          {/* State filter chips */}
+          <Grid item xs={12}>
+            <Typography variant="subtitle1" fontWeight={600} color={COLORS.dark} sx={{ mb: 1 }}>State</Typography>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+              {(states ?? []).map(s => (
+                <Chip key={s} label={s} onClick={() => setState(state === s ? "" : s)}
+                  aria-pressed={state === s} role="button"
+                  sx={{
+                    borderRadius: "50px", fontWeight: 600,
+                    backgroundColor: state === s ? COLORS.darkgreen : COLORS.white,
+                    color: state === s ? COLORS.white : COLORS.darkgreen,
+                    border: `2px solid ${COLORS.darkgreen}`,
+                    "&:hover": { backgroundColor: state === s ? COLORS.darkgreen : COLORS.muted },
+                  }}
+                />
+              ))}
+            </Box>
+          </Grid>
 
-            <Grid item xs={12} sm={4}>
+          {/* Rental ID — navigates directly to property detail */}
+          <Grid item xs={12} sm={4}>
+            <TextField label="Rental ID" value={rentalId} onChange={e => setRentalId(e.target.value)}
+              fullWidth type="number" inputProps={{ min: 0 }} />
+          </Grid>
+
+          <Grid item xs={12} sm={4}>
+            <TextField label="Postcode" value={postcode} onChange={e => setPostcode(e.target.value)}
+              inputProps={{ maxLength: 4 }} fullWidth />
+          </Grid>
+
+          {/* Minimum bedrooms, bathrooms, parking */}
+          {MIN_FIELDS.map(field => (
+            <Grid item xs={12} sm={4} key={field}>
               <TextField
-                label="Rental ID"
-                value={rentalId}
-                onChange={(e) => setRentalId(e.target.value)}
-                fullWidth
-                type="number"
-                inputProps={{ min: 0 }}
+                label={`Min ${field.charAt(0).toUpperCase() + field.slice(1)}`}
+                type="number" value={mins[field]} onChange={handleMin(field)}
+                inputProps={{ min: 0 }} fullWidth
               />
             </Grid>
+          ))}
 
-            <Grid item xs={12} sm={4}>
-              <TextField label="Postcode" value={postcode} onChange={(e) => setPostcode(e.target.value)}
-                inputProps={{ maxLength: 4 }} fullWidth />
-            </Grid>
-
-            {MIN_FIELDS.map((field) => (
-              <Grid item xs={12} sm={4} key={field}>
-                <TextField
-                  label={`Min ${field.charAt(0).toUpperCase() + field.slice(1)}`}
-                  type="number" value={mins[field]} onChange={handleMin(field)}
-                  inputProps={{ min: 0 }} fullWidth
-                />
-              </Grid>
-            ))}
-
-            <Grid item xs={12} sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-              <Button variant="contained"
-                startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <SearchIcon />}
-                onClick={handleSearch} disabled={loading}
-                sx={{ backgroundColor: COLORS.darkgreen, "&:hover": { backgroundColor: COLORS.yellow } }}>
-                {loading ? "Searching..." : "Search"}
-              </Button>
-              <Button variant="outlined" onClick={handleReset}
-                sx={{ borderColor: COLORS.darkgreen, color: COLORS.darkgreen, "&:hover": { backgroundColor: COLORS.yellow } }}>
-                Reset
-              </Button>
-              <Button variant="outlined" component={Link} to="/advanced-search"
-                startIcon={<TuneIcon />}
-                sx={{ borderColor: COLORS.darkgreen, color: COLORS.darkgreen, ml: "auto", "&:hover": { backgroundColor: COLORS.yellow } }}>
-                Advanced Search
-              </Button>
-            </Grid>
-
+          <Grid item xs={12} sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+            <Button variant="contained" onClick={handleSearch} disabled={loading}
+              startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <SearchIcon />}
+              sx={{ backgroundColor: COLORS.darkgreen, "&:hover": { backgroundColor: COLORS.yellow } }}>
+              {loading ? "Searching..." : "Search"}
+            </Button>
+            <Button variant="outlined" onClick={handleReset}
+              sx={{ borderColor: COLORS.darkgreen, color: COLORS.darkgreen, "&:hover": { backgroundColor: COLORS.yellow } }}>
+              Reset
+            </Button>
+            <Button variant="outlined" component={Link} to="/advanced-search" startIcon={<TuneIcon />}
+              sx={{ borderColor: COLORS.darkgreen, color: COLORS.darkgreen, ml: "auto", "&:hover": { backgroundColor: COLORS.yellow } }}>
+              Advanced Search
+            </Button>
           </Grid>
-        </CardContent>
+
+        </Grid>
       </Card>
 
       {error && <Alert severity="error" role="alert" sx={{ mb: 3 }}>{error}</Alert>}
 
+      {/* Search Results */}
       {results.length > 0 && (
         <>
           <Typography variant="h6" fontWeight={600} color={COLORS.dark} sx={{ mb: 2 }}>
             {pagination?.total ?? results.length} Properties Found
           </Typography>
           <Grid container spacing={2}>
-            {results.map((p) => (
+            {results.map(p => (
               <Grid item xs={12} sm={6} md={3} key={p.id}>
                 <Card
                   onClick={() => navigate(`/rentals/${p.id}`)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      navigate(`/rentals/${p.id}`);
-                    }
-                  }}
-                  tabIndex={0}
-                  role="button"
-                  aria-label={`View details for ${p.title}`}
+                  onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate(`/rentals/${p.id}`); } }}
+                  tabIndex={0} role="button" aria-label={`View details for ${p.title}`}
                   sx={{
                     borderRadius: 3, boxShadow: 2, height: "100%", cursor: "pointer",
                     transition: "0.3s", "&:hover": { boxShadow: 6, transform: "translateY(-4px)" },
@@ -206,12 +188,8 @@ export default function Search() {
                     <Typography variant="subtitle1" fontWeight={700} color={COLORS.dark}>{p.title}</Typography>
                     <Typography variant="body2" fontWeight={600} color={COLORS.dark}>${p.rent}/week</Typography>
                     <Divider sx={{ my: 1 }} />
-                    <Typography variant="body2">
-                      <span aria-hidden="true">🏠</span> {p.propertyType}
-                    </Typography>
-                    <Typography variant="body2">
-                      <span aria-hidden="true">📍</span> {p.suburb}, {p.state} {p.postcode}
-                    </Typography>
+                    <Typography variant="body2"><span aria-hidden="true">🏠</span> {p.propertyType}</Typography>
+                    <Typography variant="body2"><span aria-hidden="true">📍</span> {p.suburb}, {p.state} {p.postcode}</Typography>
                     <Typography variant="body2">
                       Bedrooms: {p.bedrooms} <span aria-hidden="true">🛏</span> ·{" "}
                       Bathrooms: {p.bathrooms} <span aria-hidden="true">🚿</span> ·{" "}
@@ -225,6 +203,7 @@ export default function Search() {
               </Grid>
             ))}
           </Grid>
+
           {pagination && (
             <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
               <Pagination count={pagination.lastPage} page={page} onChange={handlePageChange}

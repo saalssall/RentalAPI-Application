@@ -15,7 +15,7 @@ const Hero = () => (
   }}>
     <Box component="img" src={heroImage} alt="Rental property"
       sx={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-    <Box sx={{ position: "absolute", inset: 0, bgcolor: "rgba(0,0,0,0.45)" }} />
+    <Box sx={{ position: "absolute", inset: 0, bgcolor: COLORS.pinkish }} />
     <Box sx={{ position: "relative", zIndex: 1, color: COLORS.white, px: 2 }}>
       <Typography variant="h2" fontWeight={700} gutterBottom color={COLORS.white}>
         Find Your Next Rental
