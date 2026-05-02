@@ -18,6 +18,7 @@ export default function MyRatings() {
   const [selectedProperty, setSelectedProperty] = useState(null);
   const location = useLocation();
 
+  // Fetch ratings with pagination and associated rental details
   const fetchRatings = useCallback(async (pageNum) => {
     const token = localStorage.getItem("token");
     if (!token) { setError("You must be logged in to view your ratings."); setLoading(false); return; }
@@ -34,7 +35,9 @@ export default function MyRatings() {
       const list = Array.isArray(json) ? json : (json.ratings ?? json.data ?? []);
       setRatings(list);
 
+      // Fetch rental details for all rated properties
       const rentalDetails = {};
+      // Fetch details for all rated rentals in parallel
       await Promise.all(
         list.map(async (r) => {
           try {
@@ -55,6 +58,7 @@ export default function MyRatings() {
     }
   }, []);
 
+  // Fetch ratings when page changes or when the component mounts
   useEffect(() => {
     fetchRatings(page);
   }, [page, fetchRatings, location.key]);
@@ -77,6 +81,7 @@ export default function MyRatings() {
         <Alert severity="info" role="status">You haven't rated any properties yet.</Alert>
       )}
 
+     
       {!loading && ratings.length > 0 && (
         <>
           <Grid container spacing={2}>
@@ -139,6 +144,7 @@ export default function MyRatings() {
             })}
           </Grid>
 
+    {/* Pagination */}
           <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
             <Pagination
               count={totalPages}
@@ -151,6 +157,7 @@ export default function MyRatings() {
         </>
       )}
 
+    {/* Rating Dialog */}
       {selectedProperty && (
         <RatingDialog
           property={selectedProperty}
