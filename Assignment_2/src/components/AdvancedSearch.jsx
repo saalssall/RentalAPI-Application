@@ -1,15 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box, Typography, TextField, MenuItem, Select, FormControl,
   InputLabel, Button, Grid, Card, CardContent, Divider,
   Alert, CircularProgress, Chip, Pagination,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import RatingDialog from "../components/Rating";
 import API_URL from "../constants/api";
 import COLORS from "../constants/colors";
-import STATES from "../constants/states";
-import PROPERTY_TYPES from "../constants/property_types";
 
 const SORT_FIELDS = [
   "id", "title", "rent", "propertyType", "postcode", "state", "suburb",
@@ -28,6 +26,7 @@ const DEFAULT_FILTERS = {
 };
 
 export default function AdvancedSearch() {
+  const navigate = useNavigate();
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [results, setResults] = useState([]);
   const [pagination, setPagination] = useState(null);
@@ -35,7 +34,22 @@ export default function AdvancedSearch() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searched, setSearched] = useState(false);
-  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [states, setStates] = useState([]);
+  const [typeOptions, setTypeOptions] = useState([]);
+  const [propertyType, setPropertyType] = useState("Any");
+
+  // Fetch states and property types from API
+  useEffect(() => {
+    fetch(`${API_URL}/rentals/states`, { headers: { accept: "application/json" } })
+      .then(res => res.json())
+      .then(json => setStates(Array.isArray(json) ? json : []))
+      .catch(() => setStates([]));
+
+    fetch(`${API_URL}/rentals/property-types`, { headers: { accept: "application/json" } })
+  .then(res => res.json())
+  .then(json => setTypeOptions(Array.isArray(json) ? json : []))
+  .catch(() => setTypeOptions([]));
+  }, []);
 
   const set = (field) => (e) => setFilters((prev) => ({ ...prev, [field]: e.target.value }));
 
@@ -101,13 +115,15 @@ export default function AdvancedSearch() {
         <CardContent>
           <Grid container spacing={3}>
 
-            {/* Location */}
+            {/* State — from API */}
             <Grid item xs={12}>
               <Typography variant="subtitle1" fontWeight={600} color={COLORS.dark} sx={{ mb: 1 }}>State</Typography>
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {STATES.map((s) => (
+                {(states ?? []).map((s) => (
                   <Chip key={s} label={s}
                     onClick={() => setFilters((prev) => ({ ...prev, state: prev.state === s ? "" : s }))}
+                    aria-pressed={filters.state === s}
+                    role="button"
                     sx={{
                       borderRadius: "50px", fontWeight: 600,
                       backgroundColor: filters.state === s ? COLORS.darkgreen : COLORS.muted,
@@ -193,14 +209,16 @@ export default function AdvancedSearch() {
             <Grid item xs={12}>
               <Typography variant="subtitle1" fontWeight={600} color={COLORS.dark} sx={{ mb: 1 }}>Property Types</Typography>
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {PROPERTY_TYPES.map((type) => (
+                {(typeOptions ?? []).map((type) => (
                   <Chip key={type} label={type} onClick={() => togglePropertyType(type)}
+                    aria-pressed={filters.propertyTypes.includes(type)}
+                    role="button"
                     sx={{
                       borderRadius: "50px", fontWeight: 600, textTransform: "capitalize",
                       backgroundColor: filters.propertyTypes.includes(type) ? COLORS.darkgreen : COLORS.muted,
                       color: filters.propertyTypes.includes(type) ? COLORS.white : COLORS.dark,
                       border: `2px solid ${COLORS.dark}`,
-                      "&:hover": { backgroundColor: filters.propertyTypes.includes(type) ? COLORS.muted : COLORS.muted },
+                      "&:hover": { backgroundColor: filters.propertyTypes.includes(type) ? COLORS.darkgreen : COLORS.muted },
                     }}
                   />
                 ))}
@@ -215,7 +233,8 @@ export default function AdvancedSearch() {
                 sx={{ backgroundColor: COLORS.darkgreen, "&:hover": { backgroundColor: COLORS.yellow } }}>
                 {loading ? "Searching..." : "Search"}
               </Button>
-              <Button variant="outlined" onClick={handleReset} sx={{ borderColor: COLORS.darkgreen, color: COLORS.darkgreen, "&:hover": { backgroundColor: COLORS.yellow } }}>
+              <Button variant="outlined" onClick={handleReset}
+                sx={{ borderColor: COLORS.darkgreen, color: COLORS.darkgreen, "&:hover": { backgroundColor: COLORS.yellow } }}>
                 Reset
               </Button>
             </Grid>
@@ -224,7 +243,7 @@ export default function AdvancedSearch() {
         </CardContent>
       </Card>
 
-      {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+      {error && <Alert severity="error" role="alert" sx={{ mb: 3 }}>{error}</Alert>}
 
       {results.length > 0 && (
         <>
@@ -234,10 +253,22 @@ export default function AdvancedSearch() {
           <Grid container spacing={2}>
             {results.map((p) => (
               <Grid item xs={12} sm={6} md={3} key={p.id}>
-                <Card onClick={() => setSelectedProperty(p)}
+                <Card
+                  onClick={() => navigate(`/rentals/${p.id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      navigate(`/rentals/${p.id}`);
+                    }
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`View details for ${p.title}`}
                   sx={{
                     borderRadius: 3, boxShadow: 2, height: "100%", cursor: "pointer",
                     transition: "0.3s", "&:hover": { boxShadow: 6, transform: "translateY(-4px)" },
+                    "&:focus": { outline: `2px solid ${COLORS.darkgreen}`, outlineOffset: "2px" },
+                    "@media (prefers-reduced-motion: reduce)": { transition: "none", transform: "none" },
                   }}>
                   <CardContent>
                     <Typography variant="subtitle1" fontWeight={700} color={COLORS.dark}>{p.title}</Typography>
@@ -266,6 +297,7 @@ export default function AdvancedSearch() {
           {pagination && (
             <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
               <Pagination count={pagination.lastPage} page={page} onChange={handlePageChange}
+                aria-label="Search results pages"
                 sx={{
                   "& .MuiPaginationItem-root": { color: COLORS.darkgreen },
                   "& .Mui-selected": { backgroundColor: `${COLORS.darkgreen} !important`, color: COLORS.muted },
@@ -277,17 +309,13 @@ export default function AdvancedSearch() {
       )}
 
       {searched && !loading && results.length === 0 && !error && (
-        <Alert severity="info">No properties found. Try adjusting your filters.</Alert>
+        <Alert severity="info" role="status">No properties found. Try adjusting your filters.</Alert>
       )}
 
       {!searched && (
         <Typography textAlign="center" color="text.secondary" sx={{ mt: 4 }}>
           Use the filters above to search for properties.
         </Typography>
-      )}
-
-      {selectedProperty && (
-        <RatingDialog property={selectedProperty} open={Boolean(selectedProperty)} onClose={() => setSelectedProperty(null)} />
       )}
     </Box>
   );

@@ -11,6 +11,7 @@ import Home from './pages/Home';
 import AuthenticatedRoute from './components/AuthRoute';
 import AdvancedSearch from "./components/AdvancedSearch";
 import MyRatings from "./pages/MyRatings";
+import RentalDetails from "./components/RentalDetails";
 
 
 // ── Protected Route ──────────────────────────────────────────
@@ -38,6 +39,7 @@ const router = createBrowserRouter([
       { path: 'home', element: <Home /> },
       { path: 'advanced-search', element: <AdvancedSearch /> },
       { path: 'search', element: <Search /> },
+      { path: "rentals/:id", element: <RentalDetails /> },
       { path: 'login', element: <Login /> },
       { path: 'register', element: <Register /> },
       { path: 'my-ratings', element: <MyRatings /> },

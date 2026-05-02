@@ -12,7 +12,7 @@ const features = [
   { icon: <SearchIcon />, title: "Advanced Search", description: "Search by property ID, type, state, and rating.", path: "/advanced-search" },
   { icon: <HomeIcon />, title: "Property Types", description: "Houses, apartments, villas and more.", path: "/search" },
   { icon: <LocationOnIcon />, title: "Search by State", description: "Filter across all Australian states.", path: "/search" },
-  { icon: <StarIcon />, title: "Ratings", description: "Find top-rated properties by verified reviews.", path: "/search" },
+  { icon: <StarIcon />, title: "Ratings", description: "Find top-rated properties by verified reviews.", path: "/my-ratings" },
 ];
 
 // ── Hero Section ──────────────────────────────────────────

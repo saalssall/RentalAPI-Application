@@ -162,10 +162,13 @@ export default function MyRatings() {
         <RatingDialog
           property={selectedProperty}
           open={Boolean(selectedProperty)}
-          onClose={() => {
-            setSelectedProperty(null);
-            fetchRatings(page); // re-fetch to show updated rating
-          }}
+          onClose={(updated) => {
+
+  setSelectedProperty(null);
+
+  if (updated) fetchRatings(page);
+
+}}
         />
       )}
     </Box>

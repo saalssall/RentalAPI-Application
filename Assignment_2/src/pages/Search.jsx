@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import {
   Box, Typography, TextField, MenuItem, Select, FormControl,
   InputLabel, Button, Grid, Card, CardContent, Divider,
@@ -7,20 +7,18 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import TuneIcon from "@mui/icons-material/Tune";
-import RatingDialog from "../components/Rating";
 import API_URL from "../constants/api";
 import COLORS from "../constants/colors";
-import STATES from "../constants/states";
-import PROPERTY_TYPES from "../constants/property_types";
 
 const MIN_FIELDS = ["bedrooms", "bathrooms", "parking"];
 const DEFAULT_MINS = { bedrooms: "", bathrooms: "", parking: "" };
 
-// ── Search Page ──────────────────────────────────────────
 export default function Search() {
+  const navigate = useNavigate();
   const [state, setState] = useState("");
+  const [rentalId, setRentalId] = useState("");
   const [postcode, setPostcode] = useState("");
-  const [propertyType, setPropertyType] = useState("Any");
+  const [states, setStates] = useState([]);
   const [mins, setMins] = useState(DEFAULT_MINS);
   const [results, setResults] = useState([]);
   const [pagination, setPagination] = useState(null);
@@ -28,17 +26,42 @@ export default function Search() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searched, setSearched] = useState(false);
-  const [selectedProperty, setSelectedProperty] = useState(null);
 
-  // Handler for minimum fields to ensure non-negative values
+  useEffect(() => {
+    fetch(`${API_URL}/rentals/states`, { headers: { accept: "application/json" } })
+      .then(res => res.json())
+      .then(json => setStates(Array.isArray(json) ? json : []))
+      .catch(() => setStates([]));
+  }, []);
+
   const handleMin = (field) => (e) =>
     setMins((prev) => ({ ...prev, [field]: Math.max(0, Number(e.target.value)) }));
-  // Fetch search results based on filters and pagination
+
   async function fetchResults(currentPage = 1) {
     setLoading(true);
     setError(null);
 
-    const base = { page: null, ...(state && { state }), ...(postcode && { postcode }), ...(propertyType !== "Any" && { propertyType }) };
+    // If rental ID is entered, fetch directly by ID
+    if (rentalId.trim()) {
+      try {
+        const res = await fetch(`${API_URL}/rentals/${rentalId.trim()}`, {
+          headers: { accept: "application/json" }
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.message || "Property not found.");
+        setResults([json]);
+        setPagination(null);
+      } catch (err) {
+        setError(err.message || "Failed to fetch property.");
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // Otherwise proceed with normal search
+    const base = { page: null, ...(state && { state }), ...(postcode && { postcode }) };
     const makeParams = (p) => new URLSearchParams({ ...base, page: p });
 
     try {
@@ -66,11 +89,11 @@ export default function Search() {
       setLoading(false);
     }
   }
-  // Handlers for search, pagination, and reset
+
   function handleSearch() { setSearched(true); setPage(1); fetchResults(1); }
   function handlePageChange(_, newPage) { setPage(newPage); fetchResults(newPage); window.scrollTo({ top: 0, behavior: "smooth" }); }
   function handleReset() {
-    setState(""); setPostcode(""); setPropertyType("Any"); setMins(DEFAULT_MINS);
+    setState(""); setPostcode(""); setRentalId(""); setMins(DEFAULT_MINS);
     setResults([]); setPagination(null); setError(null); setSearched(false); setPage(1);
   }
 
@@ -84,11 +107,14 @@ export default function Search() {
         <CardContent>
           <Grid container spacing={3}>
 
+            {/* State chips — from API */}
             <Grid item xs={12}>
               <Typography variant="subtitle1" fontWeight={600} color={COLORS.dark} sx={{ mb: 1 }}>State</Typography>
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {STATES.map((s) => (
+                {(states ?? []).map((s) => (
                   <Chip key={s} label={s} onClick={() => setState(state === s ? "" : s)}
+                    aria-pressed={state === s}
+                    role="button"
                     sx={{
                       borderRadius: "50px", fontWeight: 600,
                       backgroundColor: state === s ? COLORS.darkgreen : COLORS.white,
@@ -102,20 +128,21 @@ export default function Search() {
             </Grid>
 
             <Grid item xs={12} sm={4}>
+              <TextField
+                label="Rental ID"
+                value={rentalId}
+                onChange={(e) => setRentalId(e.target.value)}
+                fullWidth
+                type="number"
+                inputProps={{ min: 0 }}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={4}>
               <TextField label="Postcode" value={postcode} onChange={(e) => setPostcode(e.target.value)}
                 inputProps={{ maxLength: 4 }} fullWidth />
             </Grid>
 
-            <Grid item xs={12} sm={4}>
-              <FormControl fullWidth>
-                <InputLabel>Property Type</InputLabel>
-                <Select value={propertyType} label="Property Type" onChange={(e) => setPropertyType(e.target.value)}>
-                  <MenuItem value="Any">Any</MenuItem>
-                  {PROPERTY_TYPES.map((type) => <MenuItem key={type} value={type}>{type}</MenuItem>)}
-                </Select>
-              </FormControl>
-            </Grid>
-            {/* Minimum Fields */}
             {MIN_FIELDS.map((field) => (
               <Grid item xs={12} sm={4} key={field}>
                 <TextField
@@ -126,7 +153,6 @@ export default function Search() {
               </Grid>
             ))}
 
-            {/* Buttons */}
             <Grid item xs={12} sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
               <Button variant="contained"
                 startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <SearchIcon />}
@@ -149,7 +175,7 @@ export default function Search() {
         </CardContent>
       </Card>
 
-      {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+      {error && <Alert severity="error" role="alert" sx={{ mb: 3 }}>{error}</Alert>}
 
       {results.length > 0 && (
         <>
@@ -159,19 +185,22 @@ export default function Search() {
           <Grid container spacing={2}>
             {results.map((p) => (
               <Grid item xs={12} sm={6} md={3} key={p.id}>
-                <Card onClick={() => setSelectedProperty(p)}
+                <Card
+                  onClick={() => navigate(`/rentals/${p.id}`)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault(); // prevent page scrolling when Space is pressed (keyboard users)
-                      setSelectedProperty(p);
+                      e.preventDefault();
+                      navigate(`/rentals/${p.id}`);
                     }
                   }}
                   tabIndex={0}
                   role="button"
-                  aria-label={`Rate ${p.title}`}
+                  aria-label={`View details for ${p.title}`}
                   sx={{
                     borderRadius: 3, boxShadow: 2, height: "100%", cursor: "pointer",
                     transition: "0.3s", "&:hover": { boxShadow: 6, transform: "translateY(-4px)" },
+                    "&:focus": { outline: `2px solid ${COLORS.darkgreen}`, outlineOffset: "2px" },
+                    "@media (prefers-reduced-motion: reduce)": { transition: "none", transform: "none" },
                   }}>
                   <CardContent>
                     <Typography variant="subtitle1" fontWeight={700} color={COLORS.dark}>{p.title}</Typography>
@@ -196,10 +225,10 @@ export default function Search() {
               </Grid>
             ))}
           </Grid>
-          {/* Pagination */}
           {pagination && (
             <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
               <Pagination count={pagination.lastPage} page={page} onChange={handlePageChange}
+                aria-label="Search results pages"
                 sx={{
                   "& .MuiPaginationItem-root": { color: COLORS.dark },
                   "& .Mui-selected": { backgroundColor: `${COLORS.dark} !important`, color: COLORS.darkgreen },
@@ -218,10 +247,6 @@ export default function Search() {
         <Typography textAlign="center" color="text.secondary" sx={{ mt: 4 }}>
           Use the filters above to search for properties.
         </Typography>
-      )}
-
-      {selectedProperty && (
-        <RatingDialog property={selectedProperty} open={Boolean(selectedProperty)} onClose={() => setSelectedProperty(null)} />
       )}
     </Box>
   );
