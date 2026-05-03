@@ -45,9 +45,6 @@ const router = createBrowserRouter([
       { path: 'my-ratings', element: <MyRatings /> },
       {
         element: <AuthenticatedRoute />,
-        children: [
-          { path: 'search', element: <Search /> },
-        ],
       },
     ],
   },  
