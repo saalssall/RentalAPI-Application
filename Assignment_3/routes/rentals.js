@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 
-router.get('/', (req, res, next) => {
+router.get('/:id', (req, res, next) => {
     // 1. Check for invalid query parameters
     const validParams = []; // no valid query params for this route
     const invalidParams = Object.keys(req.query).filter(key => !validParams.includes(key));
@@ -15,15 +15,23 @@ router.get('/', (req, res, next) => {
         return;
     }
 
-    // 2. Retrieve all propertyType from the database
-    req.db.from("data").distinct("propertyType").orderBy("propertyType")
+    // 2. Retrieve rental data for the specific id
+    const { id } = req.params;
+    req.db.from("data").select("*").where("id", "=", id)
         .then(rows => {
-            // 3. Return the propertyTypes as a plain array
-            const propertyTypes = rows.map(row => row["propertyType"]);
-            res.status(200).json(propertyTypes);
+            if (rows.length === 0) {
+                // 2.1 If no data found, return error response
+                res.status(404).json({
+                    error: true,
+                    message: `No rental found with id ${id}`
+                });
+                return;
+            }
+            // 2.2 Return the rental data as an object
+            res.status(200).json(rows[0]);
         })
         .catch(err => {
-            // 4. If error, return error response
+            // 3. If error, return error response
             console.log(err);
             res.status(500).json({ error: true, message: "Error in MySQL query" });
         });

@@ -6,6 +6,7 @@ import fs from 'node:fs';
 
 import userRouter from './routes/user.js';
 import statesRouter from './routes/states.js';
+import rentalsRouter from './routes/rentals.js';
 import apiRouter from './routes/api.js';
 import propertyTypesRouter from './routes/property-types.js';
 
@@ -17,12 +18,6 @@ import swaggerDocument from './docs/rentals-openapi.json' with { type: 'json' };
 
 const app = express();
 const port = 3000;
-
-morgan.token('res', (req, res) => {
-    const headers = {};
-    res.getHeaderNames().map(h => headers[h] = res.getHeader(h));
-    return JSON.stringify(headers);
-});
 
 const db = knex(knexConfig);
 
@@ -44,6 +39,7 @@ app.use('/api', apiRouter);
 app.use('/user', userRouter);
 app.use('/rentals/states', statesRouter);
 app.use('/rentals/property-types', propertyTypesRouter);
+app.use('/rentals', rentalsRouter);
 
 // to be removed later, just to test the connection
 app.get("/knex", (req, res, next) => {

@@ -161,4 +161,34 @@ router.post('/debugLogin', (req, res, next) => {
         });
 });
 
+
+router.get("/user/:email", (req, res, next) => {
+    // 1. Retrieve user profile from the database
+    const { email } = req.params;
+
+    req.db.from("users")
+        .select("email", "firstName", "lastName")
+        .where("email", "=", email)
+        .then(rows => {
+            if (rows.length === 0) {
+                // 2.1 If no user found, return error response
+                res.status(404).json({
+                    error: true,
+                    message: `User not found`
+                });
+                return;
+            }
+            // 2.2 Return the user profile as an object
+            res.status(200).json({
+                email: rows[0].email,
+                firstName: rows[0].firstName,
+                lastName: rows[0].lastName
+            });
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ error: true, message: "Error in MySQL query" });
+        });
+});
+
 export default router;
