@@ -28,7 +28,12 @@ router.get('/:id', (req, res, next) => {
                 return;
             }
             // 2.2 Return the rental data as an object
-            res.status(200).json(rows[0]);
+            const rental = rows[0];
+            res.status(200).json({
+                ...rental,
+                latitude: parseFloat(rental.latitude),
+                longitude: parseFloat(rental.longitude)
+            });
         })
         .catch(err => {
             // 3. If error, return error response

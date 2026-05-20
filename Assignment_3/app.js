@@ -9,6 +9,7 @@ import statesRouter from './routes/states.js';
 import rentalsRouter from './routes/rentals.js';
 import apiRouter from './routes/api.js';
 import propertyTypesRouter from './routes/property-types.js';
+import searchRouter from './routes/search.js';
 
 import knex from 'knex';
 import knexConfig from './knexfile.js';
@@ -40,6 +41,7 @@ app.use('/user', userRouter);
 app.use('/rentals/states', statesRouter);
 app.use('/rentals/property-types', propertyTypesRouter);
 app.use('/rentals', rentalsRouter);
+app.use('/rentals/search', searchRouter);
 
 // to be removed later, just to test the connection
 app.get("/knex", (req, res, next) => {
