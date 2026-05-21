@@ -8,8 +8,8 @@ router.get('/', authorisation, (req, res, next) => {
     'suburb', 'state', 'postcode', 'minimumRent', 'maximumRent', 
     'minimumBathroom', 'maximumBathroom', 'minimumBedrooms', 'maximumBedrooms', 
     'minimumParking', 'maximumParking', 'propertyTypes', 'minimumRating',  'maximumRating', 'sortBy', 
-    'sortOrder',  'page'
-];
+    'sortOrder',  'page'];
+    
     const invalidParams = Object.keys(req.query).filter(key => !validParams.includes(key));
 
     if (invalidParams.length > 0) {
