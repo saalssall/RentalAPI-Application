@@ -1,12 +1,13 @@
-import express from 'express';
-import argon2 from 'argon2';
+import express from "express";
+import argon2 from "argon2";
+import authorisation from "../middleware/authorisation.js";
 
-import 'dotenv/config'; //  correct dotenv import for ES modules
-import jwt from 'jsonwebtoken';
+import "dotenv/config"; //  correct dotenv import for ES modules
+import jwt from "jsonwebtoken";
 const JWT_SECRET = process.env.JWT_SECRET;
 const router = express.Router();
 
-router.post('/register', (req, res, next) => {
+router.post("/register", (req, res, next) => {
   // 1. Retrieve email and password from req.body
   const { email, password } = req.body ?? {};
 
@@ -14,181 +15,315 @@ router.post('/register', (req, res, next) => {
   if (!email || !password) {
     res.status(400).json({
       error: true,
-      message: "Request body incomplete - email and password needed"
+      message: "Request body incomplete - email and password needed",
     });
     return;
   }
 
   // 2. Determine if user already exists in table
-  const queryUsers = req.db.from("users").select("*").where("email", "=", email);
-  queryUsers.then(users => {
-    if (users.length > 0) {
-      // 2.1 If user does exist, return error response
-      throw new Error("User already exists");
-    } else {
-      // 2.2 If user does not exist, insert into table
-      return argon2.hash(password);
-    }
-  })
-  .then(hash => {
-    return req.db.from("users").insert({ email, hash });
-  })
-  .then(() => {
-    res.status(201).json({ success: true, message: "User created" });
-  })
-  .catch(e => {
-    res.status(500).json({ success: false, message: e.message });
-  });
+  const queryUsers = req.db
+    .from("users")
+    .select("*")
+    .where("email", "=", email);
+  queryUsers
+    .then((users) => {
+      if (users.length > 0) {
+        // 2.1 If user does exist, return error response
+        throw new Error("User already exists");
+      } else {
+        // 2.2 If user does not exist, insert into table
+        return argon2.hash(password);
+      }
+    })
+    .then((hash) => {
+      return req.db.from("users").insert({ email, hash });
+    })
+    .then(() => {
+      res.status(201).json({ success: true, message: "User created" });
+    })
+    .catch((e) => {
+      res.status(500).json({ success: false, message: e.message });
+    });
 });
 
-router.post('/login', (req, res, next) => {
-    const { email, password } = req.body ?? {};
+router.post("/login", (req, res, next) => {
+  const { email, password } = req.body ?? {};
 
-    // 1. Verify email and password are provided
-    if (!email || !password) {
-        res.status(400).json({
-            error: true,
-            message: "Request body incomplete - email and password needed"
+  // 1. Verify email and password are provided
+  if (!email || !password) {
+    res.status(400).json({
+      error: true,
+      message: "Request body incomplete - email and password needed",
+    });
+    return;
+  }
+
+  // 2. Determine if user already exists in table
+  req.db
+    .from("users")
+    .select("*")
+    .where("email", "=", email)
+    .then((users) => {
+      if (users.length === 0) {
+        // 2.1 If user does not exist, return error response
+        res.status(401).json({
+          error: true,
+          message: "User does not exist",
+        });
+        throw new Error("User does not exist");
+      }
+
+      // 2.2 If user does exist, verify if passwords match
+      const { hash } = users[0];
+      return argon2.verify(hash, password);
+    })
+    .then((match) => {
+      if (match === undefined) return;
+
+      if (match) {
+        // 2.2.1 If passwords match, return JWT
+        console.log("Passwords match");
+        const expiresIn = 60 * 60 * 24;
+        const exp = Math.floor(Date.now() / 1000) + expiresIn;
+        const token = jwt.sign({ exp, email }, process.env.JWT_SECRET);
+        res.json({
+          token,
+          tokenType: "Bearer",
+          expiresIn,
+        });
+      } else {
+        // 2.2.2 If passwords do not match, return error response
+        res.status(401).json({
+          error: true,
+          message: "Passwords do not match",
+        });
+      }
+    })
+    .catch((error) => {
+      // Only send response if not already sent
+      if (!res.headersSent) {
+        res.status(500).json({
+          error: true,
+          message: error.message,
+        });
+      }
+      console.log("Login error:", error.message);
+    });
+});
+
+router.post("/debugLogin", (req, res, next) => {
+  const { email, password } = req.body ?? {};
+  // 1. Verify email and password are provided
+  if (!email || !password) {
+    res.status(400).json({
+      error: true,
+      message: "Request body incomplete - email and password needed",
+    });
+    return;
+  }
+  // 2. Determine if user already exists in table
+  req.db
+    .from("users")
+    .select("*")
+    .where("email", "=", email)
+    .then((users) => {
+      if (users.length === 0) {
+        // 2.1 If user does not exist, return error response
+        res.status(401).json({
+          error: true,
+          message: "User does not exist",
+        });
+        throw new Error("User does not exist");
+      }
+      // 2.2 If user does exist, verify if passwords match
+      const { hash } = users[0];
+      return argon2.verify(hash, password);
+    })
+    .then((match) => {
+      if (match === undefined) return;
+      if (match) {
+        // 2.2.1 If passwords match, return JWT with 1 second expiry
+        console.log("Passwords match");
+        const expiresIn = 1;
+        const exp = Math.floor(Date.now() / 1000) + expiresIn;
+        const token = jwt.sign({ exp, email }, process.env.JWT_SECRET);
+        res.json({
+          token,
+          tokenType: "Bearer",
+          expiresIn,
+        });
+      } else {
+        // 2.2.2 If passwords do not match, return error response
+        res.status(401).json({
+          error: true,
+          message: "Passwords do not match",
+        });
+      }
+    })
+    .catch((error) => {
+      // Only send response if not already sent
+      if (!res.headersSent) {
+        res.status(500).json({
+          error: true,
+          message: error.message,
+        });
+      }
+      console.log("Debug login error:", error.message);
+    });
+});
+
+router.get("/:email/profile", (req, res, next) => {
+  const { email } = req.params;
+
+  // Check if authenticated
+  const authHeader = req.headers.authorization;
+  let authenticatedEmail = null;
+
+  if (authHeader && authHeader.match(/^Bearer /)) {
+    const token = authHeader.replace(/^Bearer /, "");
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      authenticatedEmail = decoded.email;
+    } catch (e) {
+      // Invalid token, treat as unauthenticated
+    }
+  }
+
+  req.db
+    .from("users")
+    .select("*")
+    .where("email", "=", email)
+    .then((rows) => {
+      if (rows.length === 0) {
+        res.status(404).json({
+          error: true,
+          message: "User not found",
         });
         return;
-    }
+      }
 
-    // 2. Determine if user already exists in table
-    req.db.from("users").select("*").where("email", "=", email)
-        .then(users => {
-            if (users.length === 0) {
-                // 2.1 If user does not exist, return error response
-                res.status(401).json({
-                    error: true,
-                    message: "User does not exist"
-                });
-                throw new Error("User does not exist");
-            }
+      const user = rows[0];
 
-            // 2.2 If user does exist, verify if passwords match
-            const { hash } = users[0];
-            return argon2.verify(hash, password);
-        })
-        .then(match => {
-            if (match === undefined) return;
-
-            if (match) {
-                // 2.2.1 If passwords match, return JWT
-                console.log("Passwords match");
-                const expiresIn = 60 * 60 * 24;
-                const exp = Math.floor(Date.now() / 1000) + expiresIn;
-                const token = jwt.sign({ exp }, process.env.JWT_SECRET);
-                res.json({
-                    token,
-                    tokenType: "Bearer",
-                    expiresIn
-                });
-            } else {
-                // 2.2.2 If passwords do not match, return error response
-                res.status(401).json({
-                    error: true,
-                    message: "Passwords do not match"
-                });
-            }
-        })
-        .catch(error => {
-            // Only send response if not already sent
-            if (!res.headersSent) {
-                res.status(500).json({
-                    error: true,
-                    message: error.message
-                });
-            }
-            console.log("Login error:", error.message);
+      // If authenticated and matching user, return all fields
+      if (authenticatedEmail === email) {
+        res.status(200).json({
+          email: user.email,
+          firstName: user.firstName ?? null,
+          lastName: user.lastName ?? null,
+          dob: user.dob ?? null,
+          address: user.address ?? null,
         });
+      } else {
+        // Unauthenticated or non-matching, return limited fields
+        res.status(200).json({
+          email: user.email,
+          firstName: user.firstName ?? null,
+          lastName: user.lastName ?? null,
+        });
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ error: true, message: "Error in MySQL query" });
+    });
 });
 
-router.post('/debugLogin', (req, res, next) => {
-    const { email, password } = req.body ?? {};
-    // 1. Verify email and password are provided
-    if (!email || !password) {
-        res.status(400).json({
-            error: true,
-            message: "Request body incomplete - email and password needed"
-        });
-        return;
-    }
-    // 2. Determine if user already exists in table
-    req.db.from("users").select("*").where("email", "=", email)
-        .then(users => {
-            if (users.length === 0) {
-            // 2.1 If user does not exist, return error response
-                res.status(401).json({
-                    error: true,
-                    message: "User does not exist"
-                });
-                throw new Error("User does not exist");
-            }
-            // 2.2 If user does exist, verify if passwords match
-            const { hash } = users[0];
-            return argon2.verify(hash, password);
-        })
-        .then(match => {
-            if (match === undefined) return;
-            if (match) {
-            // 2.2.1 If passwords match, return JWT with 1 second expiry
-                console.log("Passwords match");
-                const expiresIn = 1;
-                const exp = Math.floor(Date.now() / 1000) + expiresIn;
-                const token = jwt.sign({ exp }, process.env.JWT_SECRET);
-                res.json({
-                    token,
-                    tokenType: "Bearer",
-                    expiresIn
-                });
-            } else {
-            // 2.2.2 If passwords do not match, return error response
-                res.status(401).json({
-                    error: true,
-                    message: "Passwords do not match"
-                });
-            }
-        })
-        .catch(error => {
-            // Only send response if not already sent
-            if (!res.headersSent) {
-                res.status(500).json({
-                    error: true,
-                    message: error.message
-                });
-            }
-            console.log("Debug login error:", error.message);
-        });
-});
-
-
-router.get("/user/:email", (req, res, next) => {
-    // 1. Retrieve user profile from the database
+router.put("/:email/profile", authorisation, (req, res, next) => {
     const { email } = req.params;
+    console.log("email from params:", email);
+    console.log("body:", req.body);
+    console.log("decoded:", jwt.verify(req.headers.authorization.replace(/^Bearer /, ""), process.env.JWT_SECRET));
+  const { firstName, lastName, dob, address } = req.body ?? {};
 
-    req.db.from("users")
-        .select("email", "firstName", "lastName")
-        .where("email", "=", email)
-        .then(rows => {
-            if (rows.length === 0) {
-                // 2.1 If no user found, return error response
-                res.status(404).json({
-                    error: true,
-                    message: `User not found`
-                });
-                return;
-            }
-            // 2.2 Return the user profile as an object
-            res.status(200).json({
-                email: rows[0].email,
-                firstName: rows[0].firstName,
-                lastName: rows[0].lastName
-            });
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).json({ error: true, message: "Error in MySQL query" });
+  // 1. Check authenticated user matches the profile being updated
+  const token = req.headers.authorization.replace(/^Bearer /, "");
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  if (decoded.email !== email) {
+    res.status(403).json({
+      error: true,
+      message: "Forbidden: you can only update your own profile",
+    });
+    return;
+  }
+
+  // 2. Check all fields are present
+  if (!firstName || !lastName || !dob || !address) {
+    res.status(400).json({
+      error: true,
+      message:
+        "Request body incomplete: firstName, lastName, dob and address are required.",
+    });
+    return;
+  }
+
+  // 3. Validate string fields
+  if (
+    typeof firstName !== "string" ||
+    typeof lastName !== "string" ||
+    typeof address !== "string"
+  ) {
+    res.status(400).json({
+      error: true,
+      message:
+        "Request body invalid: firstName, lastName and address must be strings only.",
+    });
+    return;
+  }
+
+  // 4. Validate dob format YYYY-MM-DD
+  const dobRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dobRegex.test(dob)) {
+    res.status(400).json({
+      error: true,
+      message: "Invalid input: dob must be a real date in format YYYY-MM-DD.",
+    });
+    return;
+  }
+
+  // 5. Validate dob is a real date
+  const [year, month, day] = dob.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() + 1 !== month ||
+    date.getDate() !== day
+  ) {
+    res.status(400).json({
+      error: true,
+      message: "Invalid input: dob must be a real date in format YYYY-MM-DD.",
+    });
+    return;
+  }
+
+  // 6. Validate dob is in the past
+  if (date >= new Date()) {
+    res.status(400).json({
+      error: true,
+      message: "Invalid input: dob must be a date in the past.",
+    });
+    return;
+  }
+
+  // 7. Update the user profile
+// 7. Update the user profile
+req.db.from("users").where("email", "=", email)
+    .update({ firstName, lastName, dob, address })
+    .then(() => {
+        // Return exactly what was sent in the request
+        res.status(200).json({
+            email,
+            firstName,
+            lastName,
+            dob,
+            address
         });
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({ error: true, message: "Error in MySQL query" });
+    });
 });
+
+
 
 export default router;

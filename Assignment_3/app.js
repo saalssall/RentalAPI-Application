@@ -10,6 +10,7 @@ import rentalsRouter from './routes/rentals.js';
 import apiRouter from './routes/api.js';
 import propertyTypesRouter from './routes/property-types.js';
 import searchRouter from './routes/search.js';
+import ratingRouter from './routes/rating.js';
 
 import knex from 'knex';
 import knexConfig from './knexfile.js';
@@ -40,21 +41,11 @@ app.use('/api', apiRouter);
 app.use('/user', userRouter);
 app.use('/rentals/states', statesRouter);
 app.use('/rentals/property-types', propertyTypesRouter);
-app.use('/rentals', rentalsRouter);
 app.use('/rentals/search', searchRouter);
+app.use('/rentals', rentalsRouter);
+app.use('/ratings', ratingRouter);
 
-// to be removed later, just to test the connection
-app.get("/knex", (req, res, next) => {
-    req.db.raw("SELECT VERSION()")
-        .then(version => {
-            console.log(version[0][0]);
-            res.send("Version logged successfully");
-        })
-        .catch(err => {
-            console.log(err);
-            throw err;
-        });
-});
+
 
 app.get('/', (req, res) => {
     res.send('Hello world');

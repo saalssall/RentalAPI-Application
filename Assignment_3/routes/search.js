@@ -2,7 +2,7 @@ import express from 'express';
 import authorisation from '../middleware/authorisation.js';
 const router = express.Router();
 
-router.get('/', authorisation, (req, res, next) => {
+router.get('/', (req, res, next) => {
     // 1. Check for invalid query parameters
     const validParams = [
     'suburb', 'state', 'postcode', 'minimumRent', 'maximumRent', 

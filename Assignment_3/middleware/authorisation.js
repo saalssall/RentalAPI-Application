@@ -24,7 +24,7 @@ const authorisation = (req, res, next) => {
         if (error.name === 'TokenExpiredError') {
             res.status(401).json({
                 error: true,
-                message: "Token expired"
+                message: "JWT token has expired"
             });
         } else {
             res.status(401).json({
