@@ -207,11 +207,17 @@ router.get("/:email/profile", (req, res, next) => {
       // Format date to YYYY-MM-DD without timezone conversion
       const formatDate = (date) => {
         if (!date) return null;
-        if (typeof date === "string") return date.split("T")[0];
+        if (typeof date === "string") {
+          // If it's already in YYYY-MM-DD format, return as is
+          if (/^\d{4}-\d{2}-\d{2}$/.test(date)) return date;
+          // Otherwise split on T
+          return date.split("T")[0];
+        }
+        // For Date objects, use local time not UTC
         const d = new Date(date);
-        const year = d.getUTCFullYear();
-        const month = String(d.getUTCMonth() + 1).padStart(2, "0");
-        const day = String(d.getUTCDate()).padStart(2, "0");
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
         return `${year}-${month}-${day}`;
       };
       // If authenticated and matching user, return all fields
