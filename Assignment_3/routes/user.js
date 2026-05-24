@@ -204,13 +204,23 @@ router.get("/:email/profile", (req, res, next) => {
 
       const user = rows[0];
 
+      // Format date to YYYY-MM-DD without timezone conversion
+      const formatDate = (date) => {
+        if (!date) return null;
+        if (typeof date === "string") return date.split("T")[0];
+        const d = new Date(date);
+        const year = d.getUTCFullYear();
+        const month = String(d.getUTCMonth() + 1).padStart(2, "0");
+        const day = String(d.getUTCDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      };
       // If authenticated and matching user, return all fields
       if (authenticatedEmail === email) {
         res.status(200).json({
           email: user.email,
           firstName: user.firstName ?? null,
           lastName: user.lastName ?? null,
-          dob: user.dob ?? null,
+          dob: formatDate(user.dob),
           address: user.address ?? null,
         });
       } else {
@@ -229,10 +239,16 @@ router.get("/:email/profile", (req, res, next) => {
 });
 
 router.put("/:email/profile", authorisation, (req, res, next) => {
-    const { email } = req.params;
-    console.log("email from params:", email);
-    console.log("body:", req.body);
-    console.log("decoded:", jwt.verify(req.headers.authorization.replace(/^Bearer /, ""), process.env.JWT_SECRET));
+  const { email } = req.params;
+  console.log("email from params:", email);
+  console.log("body:", req.body);
+  console.log(
+    "decoded:",
+    jwt.verify(
+      req.headers.authorization.replace(/^Bearer /, ""),
+      process.env.JWT_SECRET,
+    ),
+  );
   const { firstName, lastName, dob, address } = req.body ?? {};
 
   // 1. Check authenticated user matches the profile being updated
@@ -305,25 +321,25 @@ router.put("/:email/profile", authorisation, (req, res, next) => {
   }
 
   // 7. Update the user profile
-// 7. Update the user profile
-req.db.from("users").where("email", "=", email)
+  // 7. Update the user profile
+  req.db
+    .from("users")
+    .where("email", "=", email)
     .update({ firstName, lastName, dob, address })
     .then(() => {
-        // Return exactly what was sent in the request
-        res.status(200).json({
-            email,
-            firstName,
-            lastName,
-            dob,
-            address
-        });
+      // Return exactly what was sent in the request
+      res.status(200).json({
+        email,
+        firstName,
+        lastName,
+        dob,
+        address,
+      });
     })
-    .catch(err => {
-        console.log(err);
-        res.status(500).json({ error: true, message: "Error in MySQL query" });
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ error: true, message: "Error in MySQL query" });
     });
 });
-
-
 
 export default router;
