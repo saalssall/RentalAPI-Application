@@ -41,6 +41,7 @@ router.get("/", (req, res, next) => {
   const offset = (currentPage - 1) * perPage;
 
   // page - validate greater than or equal to 1
+// 1. page validation
 if (req.query.page !== undefined && (isNaN(parseInt(req.query.page)) || parseInt(req.query.page) < 1)) {
     res.status(400).json({
         error: true,
@@ -48,21 +49,31 @@ if (req.query.page !== undefined && (isNaN(parseInt(req.query.page)) || parseInt
     });
     return;
 }
-  // 3. sortBy - validate against valid sort fields
-const validSortFields = ['rent', 'bathrooms', 'bedrooms', 'parkingSpaces', 'suburb', 'latitude', 'longitude', 'averageRating', 'numRatings'];
-if (req.query.sortBy && !validSortFields.includes(req.query.sortBy)) {
+
+// 2. sortOrder value check FIRST
+if (req.query.sortOrder && req.query.sortOrder !== 'asc' && req.query.sortOrder !== 'desc') {
     res.status(400).json({
         error: true,
-        message: "Invalid sortBy parameter. Must refer to a valid sortable property."
-    }); 
+        message: "Invalid sortOrder parameter. Must be 'asc' or 'desc'."
+    });
     return;
 }
 
-// sortOrder requires sortBy
+// 3. sortOrder requires sortBy
 if (req.query.sortOrder && !req.query.sortBy) {
     res.status(400).json({
         error: true,
         message: "Invalid sortOrder parameter. sortBy must be specified."
+    });
+    return;
+}
+
+// 4. sortBy validation LAST
+const validSortFields = ['rent', 'bathrooms', 'bedrooms', 'parkingSpaces', 'suburb', 'latitude', 'longitude', 'postcode', 'averageRating', 'numRatings'];
+if (req.query.sortBy && !validSortFields.includes(req.query.sortBy)) {
+    res.status(400).json({
+        error: true,
+        message: "Invalid sortBy parameter. Must refer to a valid sortable property."
     });
     return;
 }
