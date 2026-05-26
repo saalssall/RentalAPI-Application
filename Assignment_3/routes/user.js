@@ -180,22 +180,33 @@ router.post("/debugLogin", (req, res, next) => {
     });
 });
 
+// Get user profile by email
 router.get("/:email/profile", (req, res, next) => {
-  const { email } = req.params;
+    const { email } = req.params;
 
-  // Check if authenticated
-  const authHeader = req.headers.authorization;
-  let authenticatedEmail = null;
+    // Check if authenticated
+    const authHeader = req.headers.authorization;
+    let authenticatedEmail = null;
 
-  if (authHeader && authHeader.match(/^Bearer /)) {
-    const token = authHeader.replace(/^Bearer /, "");
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      authenticatedEmail = decoded.email;
-    } catch (e) {
-      // Invalid token, treat as unauthenticated
+    if (authHeader) {
+        // If header exists but doesn't start with 'Bearer '
+        if (!authHeader.match(/^Bearer /)) {
+            res.status(401).json({
+                error: true,
+                message: "Authorization header is malformed"
+            });
+            return;
+        }
+
+        const token = authHeader.replace(/^Bearer /, "");
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            authenticatedEmail = decoded.email;
+        } catch (e) {
+            // Invalid token, treat as unauthenticated
+        }
     }
-  }
+
 
   req.db
     .from("users")
@@ -252,6 +263,7 @@ router.get("/:email/profile", (req, res, next) => {
     });
 });
 
+// Update user profile by email (authenticated)
 router.put("/:email/profile", authorisation, (req, res, next) => {
     const { email } = req.params;
     const { firstName, lastName, dob, address } = req.body ?? {};
@@ -342,4 +354,6 @@ router.put("/:email/profile", authorisation, (req, res, next) => {
         });
 });
 
+
+// 401 to do: "message": "Authorization header ('Bearer token') not found"
 export default router;

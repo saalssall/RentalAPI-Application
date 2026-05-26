@@ -19,7 +19,7 @@ router.get('/rentals/:id', authorisation, (req, res, next) => {
     const { id } = req.params;
 
     // Check if rating exists for this rental
-    req.db.from("ratings").select("*").where("rentalId", "=", id)
+    req.db.from("ratings").select("rentalId", "rating", "comment", "dateTime").where("rentalId", "=", id)
         .then(ratings => {
             if (ratings.length === 0) {
                 res.status(404).json({
