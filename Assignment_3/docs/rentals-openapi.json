@@ -904,8 +904,10 @@
                         "email": { "type": "string" },
                         "firstName": { "type": ["string", "null"] },
                         "lastName": { "type": ["string", "null"] }
-                      }
+                      },
+                      "required": ["email", "firstName", "lastName"]
                     },
+                    
                     {
                       "description": "Authenticated matching user response",
                       "type": "object",

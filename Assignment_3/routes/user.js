@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.post("/register", (req, res, next) => {
   // 1. Retrieve email and password from req.body
-  const { email, password } = req.body ?? {};
+  const { email, password, firstName, lastName, dob } = req.body ?? {};
 
   // Verify body
   if (!email || !password) {
@@ -36,7 +36,15 @@ router.post("/register", (req, res, next) => {
       }
     })
     .then((hash) => {
-      return req.db.from("users").insert({ email, hash });
+      return req.db
+        .from("users")
+        .insert({
+          email,
+          hash,
+          firstName: firstName ?? null,
+          lastName: lastName ?? null,
+          dob: dob ?? null,
+        });
     })
     .then(() => {
       res.status(201).json({ success: true, message: "User created" });
