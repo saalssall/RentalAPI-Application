@@ -9,7 +9,7 @@ router.post('/debugEraseRatings', (req, res, next) => {
             res.status(200).json({ message: "All ratings successfully erased." });
         })
         .catch(err => {
-            console.log("Full error:", err);  // ← this will show the full error
+            console.log("Full error:", err);  
             res.status(500).json({ error: true, message: err.message });
         });
 });
