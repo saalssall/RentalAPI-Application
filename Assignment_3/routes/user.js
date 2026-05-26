@@ -253,107 +253,93 @@ router.get("/:email/profile", (req, res, next) => {
 });
 
 router.put("/:email/profile", authorisation, (req, res, next) => {
-  const { email } = req.params;
-  console.log("email from params:", email);
-  console.log("body:", req.body);
-  console.log(
-    "decoded:",
-    jwt.verify(
-      req.headers.authorization.replace(/^Bearer /, ""),
-      process.env.JWT_SECRET,
-    ),
-  );
-  const { firstName, lastName, dob, address } = req.body ?? {};
+    const { email } = req.params;
+    const { firstName, lastName, dob, address } = req.body ?? {};
 
-  // 1. Check authenticated user matches the profile being updated
-  const token = req.headers.authorization.replace(/^Bearer /, "");
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  if (decoded.email !== email) {
-    res.status(403).json({
-      error: true,
-      message: "Forbidden: you can only update your own profile",
-    });
-    return;
-  }
+    // 1. Decode token
+    const token = req.headers.authorization.replace(/^Bearer /, "");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-  // 2. Check all fields are present
-  if (!firstName || !lastName || !dob || !address) {
-    res.status(400).json({
-      error: true,
-      message:
-        "Request body incomplete: firstName, lastName, dob and address are required.",
-    });
-    return;
-  }
+    // 2. Check if user exists first
+    req.db.from("users").select("*").where("email", "=", email)
+        .then(rows => {
+            if (rows.length === 0) {
+                // 2.1 User not found
+                res.status(404).json({
+                    error: true,
+                    message: "User not found"
+                });
+                return;
+            }
 
-  // 3. Validate string fields
-  if (
-    typeof firstName !== "string" ||
-    typeof lastName !== "string" ||
-    typeof address !== "string"
-  ) {
-    res.status(400).json({
-      error: true,
-      message:
-        "Request body invalid: firstName, lastName and address must be strings only.",
-    });
-    return;
-  }
+            // 2.2 Check authenticated user matches the profile being updated
+            if (decoded.email !== email) {
+                res.status(403).json({
+                    error: true,
+                    message: "Forbidden"  
+                });
+                return;
+            }
 
-  // 4. Validate dob format YYYY-MM-DD
-  const dobRegex = /^\d{4}-\d{2}-\d{2}$/;
-  if (!dobRegex.test(dob)) {
-    res.status(400).json({
-      error: true,
-      message: "Invalid input: dob must be a real date in format YYYY-MM-DD.",
-    });
-    return;
-  }
+            // 3. Check all fields are present
+            if (!firstName || !lastName || !dob || !address) {
+                res.status(400).json({
+                    error: true,
+                    message: "Request body incomplete: firstName, lastName, dob and address are required.",
+                });
+                return;
+            }
 
-  // 5. Validate dob is a real date
-  const [year, month, day] = dob.split("-").map(Number);
-  const date = new Date(year, month - 1, day);
-  if (
-    date.getFullYear() !== year ||
-    date.getMonth() + 1 !== month ||
-    date.getDate() !== day
-  ) {
-    res.status(400).json({
-      error: true,
-      message: "Invalid input: dob must be a real date in format YYYY-MM-DD.",
-    });
-    return;
-  }
+            // 4. Validate string fields
+            if (typeof firstName !== "string" || typeof lastName !== "string" || typeof address !== "string") {
+                res.status(400).json({
+                    error: true,
+                    message: "Request body invalid: firstName, lastName and address must be strings only.",
+                });
+                return;
+            }
 
-  // 6. Validate dob is in the past
-  if (date >= new Date()) {
-    res.status(400).json({
-      error: true,
-      message: "Invalid input: dob must be a date in the past.",
-    });
-    return;
-  }
+            // 5. Validate dob format YYYY-MM-DD
+            const dobRegex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!dobRegex.test(dob)) {
+                res.status(400).json({
+                    error: true,
+                    message: "Invalid input: dob must be a real date in format YYYY-MM-DD.",
+                });
+                return;
+            }
 
-  // 7. Update the user profile
-  // 7. Update the user profile
-  req.db
-    .from("users")
-    .where("email", "=", email)
-    .update({ firstName, lastName, dob, address })
-    .then(() => {
-      // Return exactly what was sent in the request
-      res.status(200).json({
-        email,
-        firstName,
-        lastName,
-        dob,
-        address,
-      });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ error: true, message: "Error in MySQL query" });
-    });
+            // 6. Validate dob is a real date
+            const [year, month, day] = dob.split("-").map(Number);
+            const date = new Date(year, month - 1, day);
+            if (date.getFullYear() !== year || date.getMonth() + 1 !== month || date.getDate() !== day) {
+                res.status(400).json({
+                    error: true,
+                    message: "Invalid input: dob must be a real date in format YYYY-MM-DD.",
+                });
+                return;
+            }
+
+            // 7. Validate dob is in the past
+            if (date >= new Date()) {
+                res.status(400).json({
+                    error: true,
+                    message: "Invalid input: dob must be a date in the past.",
+                });
+                return;
+            }
+
+            // 8. Update the user profile
+            return req.db.from("users").where("email", "=", email)
+                .update({ firstName, lastName, dob, address })
+                .then(() => {
+                    res.status(200).json({ email, firstName, lastName, dob, address });
+                });
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(500).json({ error: true, message: "Error in MySQL query" });
+        });
 });
 
 export default router;
