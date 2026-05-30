@@ -2,7 +2,6 @@ import express from 'express';
 import calcAverageRating from '../utils/calRating.js';
 const router = express.Router();
 
-
 // Helpers
 const buildReview = ({ userEmail, rating, dateTime, comment }) => {
     const review = { user: userEmail, rating, dateTime };
@@ -37,9 +36,10 @@ router.get('/:id', async (req, res) => {
 
         // 3. Fetch ratings and build response
         const ratings = await req.db.from("ratings").where("rentalId", id).select("*");
+        const { id: _, ...rentalData } = rental;
 
         res.status(200).json({
-            ...rental,
+            ...rentalData,
             latitude: parseFloat(rental.latitude),
             longitude: parseFloat(rental.longitude),
             averageRating: calcAverageRating(ratings),

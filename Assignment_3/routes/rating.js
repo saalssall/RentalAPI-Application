@@ -9,8 +9,61 @@ router.post('/debugEraseRatings', (req, res, next) => {
             res.status(200).json({ message: "All ratings successfully erased." });
         })
         .catch(err => {
-            console.log("Full error:", err);  // this will show the full error
+            console.log("Full error:", err);
             res.status(500).json({ error: true, message: err.message });
+        });
+});
+
+// GET /ratings - requires auth
+router.get('/', authorisation, (req, res, next) => {
+    const userEmail = req.user.email;
+
+    if (req.query.page !== undefined && (isNaN(parseInt(req.query.page)) || parseInt(req.query.page) < 1)) {
+        res.status(400).json({
+            error: true,
+            message: "Invalid page parameter. Must be an integer greater than or equal to 1."
+        });
+        return;
+    }
+
+    const perPage = 20;
+    const currentPage = parseInt(req.query.page) > 0 ? parseInt(req.query.page) : 1;
+    const offset = (currentPage - 1) * perPage;
+
+    req.db.from("ratings").where("userEmail", "=", userEmail).count("id as total")
+        .then(([{ total }]) => {
+            const totalInt = parseInt(total);
+            const lastPage = Math.ceil(totalInt / perPage);
+
+            return req.db.from("ratings")
+                .where("userEmail", "=", userEmail)
+                .select("rentalId", "rating", "comment", "dateTime")
+                .limit(perPage)
+                .offset(offset)
+                .then(ratings => {
+                    res.status(200).json({
+                        data: ratings.map(r => {
+                            const item = { rentalId: r.rentalId, rating: r.rating };
+                            if (r.comment) item.comment = r.comment;
+                            item.dateTime = r.dateTime;
+                            return item;
+                        }),
+                        pagination: {
+                            total: totalInt,
+                            lastPage,
+                            prevPage: currentPage > 1 ? currentPage - 1 : null,
+                            nextPage: currentPage < lastPage ? currentPage + 1 : null,
+                            perPage,
+                            currentPage,
+                            from: offset,
+                            to: offset + ratings.length
+                        }
+                    });
+                });
+            })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ error: true, message: "Error in MySQL query" });
         });
 });
 
@@ -29,7 +82,7 @@ router.get('/rentals/:id', authorisation, (req, res, next) => {
             }
 
             const result = ratings.map(r => {
-                const response = { rentalId: r.rentalId, rating: r.rating};
+                const response = { rating: r.rating };
                 if (r.comment) response.comment = r.comment;
                 response.dateTime = r.dateTime;
                 return response;
@@ -48,7 +101,6 @@ router.post('/rentals/:id', authorisation, (req, res, next) => {
     const { id } = req.params;
     const { rating, comment } = req.body ?? {};
 
-    // 1. Validate comment if provided
     if (comment !== undefined && (typeof comment !== "string" || comment.length < 1 || comment.length > 2000)) {
         res.status(400).json({
             error: true,
@@ -57,7 +109,6 @@ router.post('/rentals/:id', authorisation, (req, res, next) => {
         return;
     }
 
-    // 2. Check rental exists
     req.db.from("data").select("*").where("id", "=", id)
         .then(rows => {
             if (rows.length === 0) {
@@ -68,43 +119,41 @@ router.post('/rentals/:id', authorisation, (req, res, next) => {
                 return;
             }
 
-            // 3. Get user email from token
             const token = req.headers.authorization.replace(/^Bearer /, "");
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
             const userEmail = decoded.email;
             const dateTime = new Date();
 
-            // 4. Check if rating already exists for this user and rental
             return req.db.from("ratings").select("*")
                 .where("rentalId", "=", id)
                 .where("userEmail", "=", userEmail)
                 .then(existing => {
                     if (existing.length > 0) {
-                        // 4.1 Update existing rating
                         return req.db.from("ratings")
                             .where("rentalId", "=", id)
                             .where("userEmail", "=", userEmail)
                             .update({ rating, comment: comment || null, dateTime })
                             .then(() => {
-                                const response = { rating, dateTime };
+                                const response = { rating };
                                 if (comment) response.comment = comment;
+                                response.dateTime = dateTime;
                                 res.status(201).json(response);
                             });
                     } else {
-                        // 4.2 Insert new rating
                         return req.db.from("ratings")
                             .insert({ rentalId: id, userEmail, rating, comment: comment || null, dateTime })
                             .then(() => {
-                                const response = { rating, dateTime };
+                                const response = { rating };
                                 if (comment) response.comment = comment;
+                                response.dateTime = dateTime;
                                 res.status(201).json(response);
                             });
                     }
                 });
         })
         .catch(err => {
-    console.log("FULL ERROR:", err.message, err.code, err.sqlMessage);
-    res.status(500).json({ error: true, message: err.message });
+            console.log("FULL ERROR:", err.message, err.code, err.sqlMessage);
+            res.status(500).json({ error: true, message: err.message });
         });
 });
 

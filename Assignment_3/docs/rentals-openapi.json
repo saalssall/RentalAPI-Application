@@ -29,7 +29,9 @@
                   "items": {
                     "type": "string"
                   },
-                  "examples": [["ACT","NSW","NT","Qld","SA","Tas","Vic","WA"]]
+                  "examples": [
+                    ["ACT", "NSW", "NT", "Qld", "SA", "Tas", "Vic", "WA"]
+                  ]
                 }
               }
             }
@@ -71,7 +73,21 @@
                   "items": {
                     "type": "string"
                   },
-                  "examples": [["acreage/semi-rural","apartment","duplex/semi-detached","flat","house","other","studio","terrace","townhouse","unit","villa"]]
+                  "examples": [
+                    [
+                      "acreage/semi-rural",
+                      "apartment",
+                      "duplex/semi-detached",
+                      "flat",
+                      "house",
+                      "other",
+                      "studio",
+                      "terrace",
+                      "townhouse",
+                      "unit",
+                      "villa"
+                    ]
+                  ]
                 }
               }
             }
@@ -179,7 +195,19 @@
               "type": "array",
               "items": {
                 "type": "string",
-                "enum": ["acreage/semi-rural","apartment","duplex/semi-detached","flat","house","other","studio","terrace","townhouse","unit","villa"]
+                "enum": [
+                  "acreage/semi-rural",
+                  "apartment",
+                  "duplex/semi-detached",
+                  "flat",
+                  "house",
+                  "other",
+                  "studio",
+                  "terrace",
+                  "townhouse",
+                  "unit",
+                  "villa"
+                ]
               }
             }
           },
@@ -201,7 +229,18 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": ["rent", "bathrooms", "bedrooms", "parkingSpaces", "suburb", "latitude", "longitude", "postcode", "averageRating", "numRatings"]
+              "enum": [
+                "rent",
+                "bathrooms",
+                "bedrooms",
+                "parkingSpaces",
+                "suburb",
+                "latitude",
+                "longitude",
+                "postcode",
+                "averageRating",
+                "numRatings"
+              ]
             }
           },
           {
@@ -231,18 +270,39 @@
                         "type": "object",
                         "properties": {
                           "id": { "type": "integer", "examples": [1] },
-                          "title": { "type": "string", "examples": ["Auburn Townhouse For Lease"] },
+                          "title": {
+                            "type": "string",
+                            "examples": ["Auburn Townhouse For Lease"]
+                          },
                           "rent": { "type": "integer", "examples": [1200] },
-                          "propertyType": { "type": "string", "examples": ["townhouse"] },
-                          "latitude": { "type": "number", "examples": [-33.84077015] },
-                          "longitude": { "type": "number", "examples": [151.00802461] },
+                          "propertyType": {
+                            "type": "string",
+                            "examples": ["townhouse"]
+                          },
+                          "latitude": {
+                            "type": "number",
+                            "examples": [-33.84077015]
+                          },
+                          "longitude": {
+                            "type": "number",
+                            "examples": [151.00802461]
+                          },
                           "postcode": { "type": "integer", "examples": [2144] },
                           "state": { "type": "string", "examples": ["NSW"] },
-                          "suburb": { "type": "string", "examples": ["Auburn"] },
+                          "suburb": {
+                            "type": "string",
+                            "examples": ["Auburn"]
+                          },
                           "bathrooms": { "type": "integer", "examples": [2] },
                           "bedrooms": { "type": "integer", "examples": [4] },
-                          "parkingSpaces": { "type": "integer", "examples": [2] },
-                          "averageRating": { "type": ["number", "null"], "examples": [null] },
+                          "parkingSpaces": {
+                            "type": "integer",
+                            "examples": [2]
+                          },
+                          "averageRating": {
+                            "type": ["number", "null"],
+                            "examples": [null]
+                          },
                           "numRatings": { "type": "integer", "examples": [0] }
                         }
                       }
@@ -252,8 +312,14 @@
                       "properties": {
                         "total": { "type": "integer", "examples": [6767] },
                         "lastPage": { "type": "integer", "examples": [677] },
-                        "prevPage": { "type": ["integer", "null"], "examples": [null] },
-                        "nextPage": { "type": ["integer", "null"], "examples": [2] },
+                        "prevPage": {
+                          "type": ["integer", "null"],
+                          "examples": [null]
+                        },
+                        "nextPage": {
+                          "type": ["integer", "null"],
+                          "examples": [2]
+                        },
                         "perPage": { "type": "integer", "examples": [10] },
                         "currentPage": { "type": "integer", "examples": [1] },
                         "from": { "type": "integer", "examples": [0] },
@@ -275,98 +341,168 @@
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Invalid query parameters: yourParamHere"] }
+                        "message": {
+                          "type": "string",
+                          "examples": [
+                            "Invalid query parameters: yourParamHere"
+                          ]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Invalid postcode parameter. Must be an integer in the range of 0000-9999."] }
+                        "message": {
+                          "type": "string",
+                          "examples": [
+                            "Invalid postcode parameter. Must be an integer in the range of 0000-9999."
+                          ]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Invalid minimumRent parameter. Must be a non-negative integer."] }
+                        "message": {
+                          "type": "string",
+                          "examples": [
+                            "Invalid minimumRent parameter. Must be a non-negative integer."
+                          ]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Invalid maximumRent parameter. Must be a non-negative integer."] }
+                        "message": {
+                          "type": "string",
+                          "examples": [
+                            "Invalid maximumRent parameter. Must be a non-negative integer."
+                          ]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Invalid minimumBathrooms parameter. Must be a non-negative integer."] }
+                        "message": {
+                          "type": "string",
+                          "examples": [
+                            "Invalid minimumBathrooms parameter. Must be a non-negative integer."
+                          ]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Invalid maximumBathrooms parameter. Must be a non-negative integer."] }
+                        "message": {
+                          "type": "string",
+                          "examples": [
+                            "Invalid maximumBathrooms parameter. Must be a non-negative integer."
+                          ]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Invalid minimumBedrooms parameter. Must be a non-negative integer."] }
+                        "message": {
+                          "type": "string",
+                          "examples": [
+                            "Invalid minimumBedrooms parameter. Must be a non-negative integer."
+                          ]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Invalid maximumBedrooms parameter. Must be a non-negative integer."] }
+                        "message": {
+                          "type": "string",
+                          "examples": [
+                            "Invalid maximumBedrooms parameter. Must be a non-negative integer."
+                          ]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Invalid minimumParking parameter. Must be a non-negative integer."] }
+                        "message": {
+                          "type": "string",
+                          "examples": [
+                            "Invalid minimumParking parameter. Must be a non-negative integer."
+                          ]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Invalid maximumParking parameter. Must be a non-negative integer."] }
+                        "message": {
+                          "type": "string",
+                          "examples": [
+                            "Invalid maximumParking parameter. Must be a non-negative integer."
+                          ]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Invalid sortOrder parameter. Must be 'asc' or 'desc'."] }
+                        "message": {
+                          "type": "string",
+                          "examples": [
+                            "Invalid sortOrder parameter. Must be 'asc' or 'desc'."
+                          ]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Invalid sortOrder parameter. sortBy must be specified."] }
+                        "message": {
+                          "type": "string",
+                          "examples": [
+                            "Invalid sortOrder parameter. sortBy must be specified."
+                          ]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Invalid sortBy parameter. Must refer to a valid sortable property."] }
+                        "message": {
+                          "type": "string",
+                          "examples": [
+                            "Invalid sortBy parameter. Must refer to a valid sortable property."
+                          ]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Invalid page parameter. Must be an integer greater than or equal to 1."] }
+                        "message": {
+                          "type": "string",
+                          "examples": [
+                            "Invalid page parameter. Must be an integer greater than or equal to 1."
+                          ]
+                        }
                       }
                     }
                   ]
@@ -409,7 +545,10 @@
                     "bathrooms": { "type": "integer" },
                     "bedrooms": { "type": "integer" },
                     "parkingSpaces": { "type": "integer" },
-                    "averageRating": { "type": ["number", "null"], "examples": [null] },
+                    "averageRating": {
+                      "type": ["number", "null"],
+                      "examples": [null]
+                    },
                     "numRatings": { "type": "integer", "examples": [0] },
                     "reviews": {
                       "type": "array",
@@ -436,7 +575,10 @@
                   "type": "object",
                   "properties": {
                     "error": { "type": "boolean", "examples": [true] },
-                    "message": { "type": "string", "examples": ["Invalid query parameters: yourParamHere"] }
+                    "message": {
+                      "type": "string",
+                      "examples": ["Invalid query parameters: yourParamHere"]
+                    }
                   }
                 }
               }
@@ -450,8 +592,138 @@
                   "type": "object",
                   "properties": {
                     "error": { "type": "boolean", "examples": [true] },
-                    "message": { "type": "string", "examples": ["No rental found with id 99999"] }
+                    "message": {
+                      "type": "string",
+                      "examples": ["No rental found with id 99999"]
+                    }
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ratings": {
+      "get": {
+        "tags": ["Ratings"],
+        "description": "Returns a list of ratings made by the current user. This endpoint requires authorisation to use (click the 'Authorize' button and paste in a valid JWT to test this out in Swagger).",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "An array of objects containing rentalId, rating and dateTime properties. The results are limited to 20 per page. An example of one object in the array is shown below.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "rentalId": { "type": "integer", "examples": [1234] },
+                          "rating": { "type": "integer", "examples": [3] },
+                          "dateTime": {
+                            "type": "string",
+                            "examples": ["2026-03-14T23:47:45.371Z"]
+                          }
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "total": { "type": "integer", "examples": [12] },
+                        "lastPage": { "type": "integer", "examples": [1] },
+                        "prevPage": {
+                          "type": ["integer", "null"],
+                          "examples": [null]
+                        },
+                        "nextPage": {
+                          "type": ["integer", "null"],
+                          "examples": [null]
+                        },
+                        "perPage": { "type": "integer", "examples": [20] },
+                        "currentPage": { "type": "integer", "examples": [1] },
+                        "from": { "type": "integer", "examples": [0] },
+                        "to": { "type": "integer", "examples": [12] }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": { "type": "boolean", "examples": [true] },
+                    "message": {
+                      "type": "string",
+                      "examples": [
+                        "Invalid page parameter. Must be an integer greater than or equal to 1."
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": { "type": "boolean", "examples": [true] },
+                        "message": {
+                          "type": "string",
+                          "examples": [
+                            "Authorization header ('Bearer token') not found"
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": { "type": "boolean", "examples": [true] },
+                        "message": {
+                          "type": "string",
+                          "examples": ["JWT token has expired"]
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": { "type": "boolean", "examples": [true] },
+                        "message": {
+                          "type": "string",
+                          "examples": ["Invalid JWT token"]
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -471,7 +743,10 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "message": { "type": "string", "examples": ["All ratings erased"] }
+                    "message": {
+                      "type": "string",
+                      "examples": ["All ratings erased"]
+                    }
                   }
                 }
               }
@@ -502,7 +777,10 @@
                   "type": "object",
                   "properties": {
                     "rating": { "type": "integer", "examples": [4] },
-                    "dateTime": { "type": "string", "examples": ["2026-03-14T23:47:45.371Z"] }
+                    "dateTime": {
+                      "type": "string",
+                      "examples": ["2026-03-14T23:47:45.371Z"]
+                    }
                   }
                 }
               }
@@ -518,21 +796,32 @@
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Authorization header ('Bearer token') not found"] }
+                        "message": {
+                          "type": "string",
+                          "examples": [
+                            "Authorization header ('Bearer token') not found"
+                          ]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["JWT token has expired"] }
+                        "message": {
+                          "type": "string",
+                          "examples": ["JWT token has expired"]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Invalid JWT token"] }
+                        "message": {
+                          "type": "string",
+                          "examples": ["Invalid JWT token"]
+                        }
                       }
                     }
                   ]
@@ -548,7 +837,10 @@
                   "type": "object",
                   "properties": {
                     "error": { "type": "boolean", "examples": [true] },
-                    "message": { "type": "string", "examples": ["No rating exists with this rental ID."] }
+                    "message": {
+                      "type": "string",
+                      "examples": ["No rating exists with this rental ID."]
+                    }
                   }
                 }
               }
@@ -576,7 +868,11 @@
                 "type": "object",
                 "properties": {
                   "rating": { "type": "integer", "enum": [1, 2, 3, 4, 5] },
-                  "comment": { "type": "string", "minLength": 1, "maxLength": 2000 }
+                  "comment": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  }
                 }
               }
             }
@@ -591,8 +887,14 @@
                   "type": "object",
                   "properties": {
                     "rating": { "type": "integer", "examples": [4] },
-                    "comment": { "type": "string", "examples": ["Great place!"] },
-                    "dateTime": { "type": "string", "examples": ["2026-03-14T23:47:45.371Z"] }
+                    "comment": {
+                      "type": "string",
+                      "examples": ["Great place!"]
+                    },
+                    "dateTime": {
+                      "type": "string",
+                      "examples": ["2026-03-14T23:47:45.371Z"]
+                    }
                   }
                 }
               }
@@ -606,7 +908,12 @@
                   "type": "object",
                   "properties": {
                     "error": { "type": "boolean", "examples": [true] },
-                    "message": { "type": "string", "examples": ["Invalid comment parameter. Comment must be a string 1-2000 characters long."] }
+                    "message": {
+                      "type": "string",
+                      "examples": [
+                        "Invalid comment parameter. Comment must be a string 1-2000 characters long."
+                      ]
+                    }
                   }
                 }
               }
@@ -622,21 +929,32 @@
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Authorization header ('Bearer token') not found"] }
+                        "message": {
+                          "type": "string",
+                          "examples": [
+                            "Authorization header ('Bearer token') not found"
+                          ]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["JWT token has expired"] }
+                        "message": {
+                          "type": "string",
+                          "examples": ["JWT token has expired"]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Invalid JWT token"] }
+                        "message": {
+                          "type": "string",
+                          "examples": ["Invalid JWT token"]
+                        }
                       }
                     }
                   ]
@@ -652,7 +970,10 @@
                   "type": "object",
                   "properties": {
                     "error": { "type": "boolean", "examples": [true] },
-                    "message": { "type": "string", "examples": ["No rental exists with this ID."] }
+                    "message": {
+                      "type": "string",
+                      "examples": ["No rental exists with this ID."]
+                    }
                   }
                 }
               }
@@ -688,7 +1009,10 @@
                   "type": "object",
                   "properties": {
                     "success": { "type": "boolean", "examples": [true] },
-                    "message": { "type": "string", "examples": ["User created"] }
+                    "message": {
+                      "type": "string",
+                      "examples": ["User created"]
+                    }
                   }
                 }
               }
@@ -702,7 +1026,12 @@
                   "type": "object",
                   "properties": {
                     "error": { "type": "boolean", "examples": [true] },
-                    "message": { "type": "string", "examples": ["Request body incomplete - email and password needed"] }
+                    "message": {
+                      "type": "string",
+                      "examples": [
+                        "Request body incomplete - email and password needed"
+                      ]
+                    }
                   }
                 }
               }
@@ -716,7 +1045,10 @@
                   "type": "object",
                   "properties": {
                     "success": { "type": "boolean", "examples": [false] },
-                    "message": { "type": "string", "examples": ["User already exists"] }
+                    "message": {
+                      "type": "string",
+                      "examples": ["User already exists"]
+                    }
                   }
                 }
               }
@@ -751,7 +1083,10 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "token": { "type": "string", "examples": ["ajsonwebtoken"] },
+                    "token": {
+                      "type": "string",
+                      "examples": ["ajsonwebtoken"]
+                    },
                     "tokenType": { "type": "string", "examples": ["Bearer"] },
                     "expiresIn": { "type": "number", "examples": [86400] }
                   }
@@ -767,7 +1102,12 @@
                   "type": "object",
                   "properties": {
                     "error": { "type": "boolean", "examples": [true] },
-                    "message": { "type": "string", "examples": ["Request body incomplete - email and password needed"] }
+                    "message": {
+                      "type": "string",
+                      "examples": [
+                        "Request body incomplete - email and password needed"
+                      ]
+                    }
                   }
                 }
               }
@@ -783,14 +1123,20 @@
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["User does not exist"] }
+                        "message": {
+                          "type": "string",
+                          "examples": ["User does not exist"]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Passwords do not match"] }
+                        "message": {
+                          "type": "string",
+                          "examples": ["Passwords do not match"]
+                        }
                       }
                     }
                   ]
@@ -827,7 +1173,10 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "token": { "type": "string", "examples": ["ajsonwebtoken"] },
+                    "token": {
+                      "type": "string",
+                      "examples": ["ajsonwebtoken"]
+                    },
                     "tokenType": { "type": "string", "examples": ["Bearer"] },
                     "expiresIn": { "type": "number", "examples": [1] }
                   }
@@ -843,7 +1192,12 @@
                   "type": "object",
                   "properties": {
                     "error": { "type": "boolean", "examples": [true] },
-                    "message": { "type": "string", "examples": ["Request body incomplete - email and password needed"] }
+                    "message": {
+                      "type": "string",
+                      "examples": [
+                        "Request body incomplete - email and password needed"
+                      ]
+                    }
                   }
                 }
               }
@@ -859,14 +1213,20 @@
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["User does not exist"] }
+                        "message": {
+                          "type": "string",
+                          "examples": ["User does not exist"]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Passwords do not match"] }
+                        "message": {
+                          "type": "string",
+                          "examples": ["Passwords do not match"]
+                        }
                       }
                     }
                   ]
@@ -907,7 +1267,7 @@
                       },
                       "required": ["email", "firstName", "lastName"]
                     },
-                    
+
                     {
                       "description": "Authenticated matching user response",
                       "type": "object",
@@ -915,7 +1275,10 @@
                         "email": { "type": "string" },
                         "firstName": { "type": ["string", "null"] },
                         "lastName": { "type": ["string", "null"] },
-                        "dob": { "type": ["string", "null"], "examples": ["1990-01-01"] },
+                        "dob": {
+                          "type": ["string", "null"],
+                          "examples": ["1990-01-01"]
+                        },
                         "address": { "type": ["string", "null"] }
                       }
                     }
@@ -932,7 +1295,10 @@
                   "type": "object",
                   "properties": {
                     "error": { "type": "boolean", "examples": [true] },
-                    "message": { "type": "string", "examples": ["User not found"] }
+                    "message": {
+                      "type": "string",
+                      "examples": ["User not found"]
+                    }
                   }
                 }
               }
@@ -996,28 +1362,48 @@
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Request body incomplete: firstName, lastName, dob and address are required."] }
+                        "message": {
+                          "type": "string",
+                          "examples": [
+                            "Request body incomplete: firstName, lastName, dob and address are required."
+                          ]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Request body invalid: firstName, lastName and address must be strings only."] }
+                        "message": {
+                          "type": "string",
+                          "examples": [
+                            "Request body invalid: firstName, lastName and address must be strings only."
+                          ]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Invalid input: dob must be a real date in format YYYY-MM-DD."] }
+                        "message": {
+                          "type": "string",
+                          "examples": [
+                            "Invalid input: dob must be a real date in format YYYY-MM-DD."
+                          ]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Invalid input: dob must be a date in the past."] }
+                        "message": {
+                          "type": "string",
+                          "examples": [
+                            "Invalid input: dob must be a date in the past."
+                          ]
+                        }
                       }
                     }
                   ]
@@ -1035,21 +1421,32 @@
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Authorization header ('Bearer token') not found"] }
+                        "message": {
+                          "type": "string",
+                          "examples": [
+                            "Authorization header ('Bearer token') not found"
+                          ]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["JWT token has expired"] }
+                        "message": {
+                          "type": "string",
+                          "examples": ["JWT token has expired"]
+                        }
                       }
                     },
                     {
                       "type": "object",
                       "properties": {
                         "error": { "type": "boolean", "examples": [true] },
-                        "message": { "type": "string", "examples": ["Invalid JWT token"] }
+                        "message": {
+                          "type": "string",
+                          "examples": ["Invalid JWT token"]
+                        }
                       }
                     }
                   ]
@@ -1065,7 +1462,12 @@
                   "type": "object",
                   "properties": {
                     "error": { "type": "boolean", "examples": [true] },
-                    "message": { "type": "string", "examples": ["Forbidden: you can only update your own profile"] }
+                    "message": {
+                      "type": "string",
+                      "examples": [
+                        "Forbidden: you can only update your own profile"
+                      ]
+                    }
                   }
                 }
               }
