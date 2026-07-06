@@ -47,8 +47,8 @@ const router = createBrowserRouter([
         element: <AuthenticatedRoute />,
       },
     ],
-  },  
-]);
+  },
+], { basename: '/Rental-Search-Application/' });
 
 function App() {
   return (
